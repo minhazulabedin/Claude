@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="description" content="NEO//CALC — a futuristic neon calculator: scientific, converter and programmer modes." />
+    <title>NEO//CALC</title>
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#05060c" />
+    <meta name="color-scheme" content="dark" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NEO//CALC" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="glow-orb glow-orb--cyan" aria-hidden="true"></div>
+    <div class="glow-orb glow-orb--magenta" aria-hidden="true"></div>
+
+    <main class="device" id="app">
+      <header class="device-head">
+        <div class="brand">
+          <span class="brand-mark">NEO</span><span class="brand-slash">//</span><span class="brand-mark">CALC</span>
+          <span class="brand-ver">v1.0</span>
+        </div>
+        <button class="icon-btn" id="historyBtn" type="button" aria-label="Toggle history">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/><path d="M12 7v5l3 2"/></svg>
+        </button>
+      </header>
+
+      <nav class="mode-tabs" role="tablist">
+        <button class="mode-tab is-active" data-mode="std" role="tab">STD</button>
+        <button class="mode-tab" data-mode="sci" role="tab">SCI</button>
+        <button class="mode-tab" data-mode="conv" role="tab">CONV</button>
+        <button class="mode-tab" data-mode="prog" role="tab">PROG</button>
+      </nav>
+
+      <section class="status-bar" id="statusBar">
+        <span class="chip" id="angleChip" data-action="toggleAngle" hidden>DEG</span>
+        <span class="chip" id="baseChip" hidden>DEC</span>
+        <span class="chip memchip" id="memChip" hidden>M</span>
+        <span class="chip" id="rateChip" hidden>—</span>
+        <span class="filler"></span>
+        <span class="chip ghost" id="errChip" hidden>ERR</span>
+      </section>
+
+      <section class="display" id="display">
+        <div class="expr" id="expr">&nbsp;</div>
+        <div class="result" id="result">0</div>
+        <div class="aux" id="aux"></div>
+      </section>
+
+      <section class="pad" id="pad"></section>
+
+      <aside class="history" id="history" aria-hidden="true">
+        <div class="history-head">
+          <span>HISTORY</span>
+          <button class="link-btn" id="clearHistory" type="button">CLEAR</button>
+        </div>
+        <ol class="history-list" id="historyList"></ol>
+      </aside>
+    </main>
+
+    <script src="app.js" defer></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
