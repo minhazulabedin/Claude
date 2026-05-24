@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="cyber">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
@@ -30,22 +30,150 @@
     <div class="glow-orb glow-orb--cyan" aria-hidden="true"></div>
     <div class="glow-orb glow-orb--magenta" aria-hidden="true"></div>
 
+    <!-- Toast stack -->
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- Settings panel -->
+    <aside class="settings-panel" id="settingsPanel" aria-hidden="true" aria-label="Settings">
+      <div class="settings-head">
+        <span>SETTINGS</span>
+        <button class="icon-btn" id="settingsClose" type="button" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="settings-body">
+
+        <div class="settings-section">
+          <div class="settings-label">THEME</div>
+          <div class="theme-grid" id="themeGrid">
+            <button class="theme-swatch is-active" data-theme="cyber">
+              <div class="swatch-dots"><span style="background:#00f0ff"></span><span style="background:#ff2bd6"></span></div>
+              <small>CYBER</small>
+            </button>
+            <button class="theme-swatch" data-theme="amber">
+              <div class="swatch-dots"><span style="background:#ffb454"></span><span style="background:#ff6b35"></span></div>
+              <small>AMBER</small>
+            </button>
+            <button class="theme-swatch" data-theme="matrix">
+              <div class="swatch-dots"><span style="background:#00ff41"></span><span style="background:#39ff14"></span></div>
+              <small>MATRIX</small>
+            </button>
+            <button class="theme-swatch" data-theme="violet">
+              <div class="swatch-dots"><span style="background:#8a5bff"></span><span style="background:#e040fb"></span></div>
+              <small>VIOLET</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-label">SOUND FX</div>
+            <button class="toggle-pill" id="soundToggle" role="switch" aria-checked="false">
+              <span class="pill-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-label">HAPTICS</div>
+            <button class="toggle-pill" id="hapticToggle" role="switch" aria-checked="true">
+              <span class="pill-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-label">ANIMATIONS</div>
+            <button class="toggle-pill" id="animToggle" role="switch" aria-checked="true">
+              <span class="pill-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">NUMBER FORMAT</div>
+          <div class="seg-ctrl" id="formatSeg">
+            <button class="seg-btn is-active" data-fmt="auto">AUTO</button>
+            <button class="seg-btn" data-fmt="fixed">FIXED</button>
+            <button class="seg-btn" data-fmt="sci">SCI</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">PRECISION (DECIMAL PLACES)</div>
+          <div class="seg-ctrl" id="precSeg">
+            <button class="seg-btn" data-prec="2">2</button>
+            <button class="seg-btn" data-prec="4">4</button>
+            <button class="seg-btn is-active" data-prec="8">8</button>
+            <button class="seg-btn" data-prec="12">12</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <button class="settings-link-btn" id="showShortcuts">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M18 12h.01M10 12h4M6 16h12"/></svg>
+            VIEW KEYBOARD SHORTCUTS
+          </button>
+        </div>
+
+        <div class="settings-section">
+          <button class="danger-btn" id="clearAll">⚠ CLEAR ALL DATA</button>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Keyboard shortcuts overlay -->
+    <div class="overlay-backdrop" id="shortcutsOverlay" aria-hidden="true">
+      <div class="shortcuts-modal" role="dialog" aria-label="Keyboard shortcuts">
+        <div class="shortcuts-head">
+          <span>KEYBOARD SHORTCUTS</span>
+          <button class="icon-btn" id="shortcutsClose" type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="shortcuts-list">
+          <div class="shortcut-row"><kbd>0 – 9</kbd><span>Digits</span></div>
+          <div class="shortcut-row"><kbd>+ − × ÷</kbd><span>Operators</span></div>
+          <div class="shortcut-row"><kbd>Enter / =</kbd><span>Equals</span></div>
+          <div class="shortcut-row"><kbd>Backspace</kbd><span>Delete last char</span></div>
+          <div class="shortcut-row"><kbd>Hold ⌫</kbd><span>Clear all</span></div>
+          <div class="shortcut-row"><kbd>Escape</kbd><span>Clear expression</span></div>
+          <div class="shortcut-row"><kbd>( )</kbd><span>Parentheses</span></div>
+          <div class="shortcut-row"><kbd>^ %</kbd><span>Power / Percent</span></div>
+          <div class="shortcut-row"><kbd>.</kbd><span>Decimal point</span></div>
+          <div class="shortcut-row"><kbd>Tab</kbd><span>Next mode →</span></div>
+          <div class="shortcut-row"><kbd>Shift+Tab</kbd><span>Prev mode ←</span></div>
+          <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
+          <div class="shortcut-row touch-only"><kbd>Swipe ← →</kbd><span>Switch modes</span></div>
+          <div class="shortcut-row"><kbd>Tap result</kbd><span>Copy to clipboard</span></div>
+        </div>
+      </div>
+    </div>
+
     <main class="device" id="app">
       <header class="device-head">
         <div class="brand">
           <span class="brand-mark">NEO</span><span class="brand-slash">//</span><span class="brand-mark">CALC</span>
-          <span class="brand-ver">v1.0</span>
+          <span class="brand-ver">v2.0</span>
         </div>
-        <button class="icon-btn" id="historyBtn" type="button" aria-label="Toggle history">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/><path d="M12 7v5l3 2"/></svg>
-        </button>
+        <div class="head-actions">
+          <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <button class="icon-btn" id="historyBtn" type="button" aria-label="Toggle history">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/><path d="M12 7v5l3 2"/></svg>
+          </button>
+        </div>
       </header>
 
-      <nav class="mode-tabs" role="tablist">
-        <button class="mode-tab is-active" data-mode="std" role="tab">STD</button>
-        <button class="mode-tab" data-mode="sci" role="tab">SCI</button>
-        <button class="mode-tab" data-mode="conv" role="tab">CONV</button>
-        <button class="mode-tab" data-mode="prog" role="tab">PROG</button>
+      <nav class="mode-tabs" role="tablist" id="modeTabs">
+        <button class="mode-tab is-active" data-mode="std" role="tab" aria-selected="true">STD</button>
+        <button class="mode-tab" data-mode="sci" role="tab" aria-selected="false">SCI</button>
+        <button class="mode-tab" data-mode="conv" role="tab" aria-selected="false">CONV</button>
+        <button class="mode-tab" data-mode="prog" role="tab" aria-selected="false">PROG</button>
       </nav>
 
       <section class="status-bar" id="statusBar">
@@ -53,13 +181,15 @@
         <span class="chip" id="baseChip" hidden>DEC</span>
         <span class="chip memchip" id="memChip" hidden>M</span>
         <span class="chip" id="rateChip" hidden>—</span>
+        <span class="chip paren-chip" id="parenChip" hidden>(</span>
         <span class="filler"></span>
         <span class="chip ghost" id="errChip" hidden>ERR</span>
       </section>
 
       <section class="display" id="display">
         <div class="expr" id="expr">&nbsp;</div>
-        <div class="result" id="result">0</div>
+        <div class="result copyable" id="result" role="button" tabindex="0" aria-label="Result — tap to copy">0</div>
+        <div class="copy-hint" id="copyHint" aria-hidden="true">TAP TO COPY</div>
         <div class="aux" id="aux"></div>
       </section>
 
@@ -70,7 +200,12 @@
           <span>HISTORY</span>
           <button class="link-btn" id="clearHistory" type="button">CLEAR</button>
         </div>
+        <div class="history-search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="history-search" id="historySearch" placeholder="SEARCH HISTORY…" autocomplete="off" spellcheck="false" />
+        </div>
         <ol class="history-list" id="historyList"></ol>
+        <div class="history-stats" id="historyStats"></div>
       </aside>
     </main>
 
