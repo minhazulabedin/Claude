@@ -1,4 +1,4 @@
-const CACHE = 'neocalc-v1';
+const CACHE = 'dhaka-utility-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -28,12 +28,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // network-first for currency API
-  if (url.hostname.includes('open.er-api.com')) {
-    e.respondWith(fetch(req).catch(() => caches.match(req)));
-    return;
-  }
-  // cache-first for same-origin assets
+  // cache-first for same-origin assets, fall back to the app shell offline
   if (url.origin === self.location.origin) {
     e.respondWith(
       caches.match(req).then((cached) => cached || fetch(req).then((res) => {
@@ -44,7 +39,7 @@ self.addEventListener('fetch', (e) => {
     );
     return;
   }
-  // pass-through for everything else (e.g., google fonts) with cache fallback
+  // pass-through for cross-origin (e.g. Google Fonts) with cache fallback
   e.respondWith(
     fetch(req).then((res) => {
       const copy = res.clone();

@@ -1,1051 +1,584 @@
 /* ============================================================
- * NEO//CALC — futuristic calculator PWA
- * Modes: Standard, Scientific, Converter, Programmer
- * ============================================================ */
+   Dhaka Utility Service — offline PWA
+   Bill estimation (electricity / water / gas), bill tracker,
+   helpline directory and saving tips for residents of Dhaka.
 
-(() => {
-  'use strict';
+   NOTE on tariffs: the rates below are indicative retail slabs
+   published by BERC / the Dhaka utilities (DPDC, DESCO, Dhaka WASA,
+   Titas). They are meant for estimation only — your printed bill is
+   authoritative. Rates can be revised by the regulator at any time.
+   ============================================================ */
 
-  // ---------- storage ----------
-  const LS = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  };
+'use strict';
 
-  // ---------- state ----------
-  const state = {
-    mode: LS.get('mode', 'std'),
-    expr: '',                    // expression being built
-    result: '0',                 // currently-displayed result
-    justEvaluated: false,        // last action was '='
-    angle: LS.get('angle', 'DEG'),
-    inv: false,                  // inverse trig toggle
-    memory: LS.get('memory', 0),
-    history: LS.get('history', []),
-    // programmer
-    progValue: 0,                // integer, signed BigInt-ish (we use Number bitwise within 32-bit)
-    progBase: LS.get('progBase', 10),
-    progExpr: '',
-    // converter
-    convCat: LS.get('convCat', 'length'),
-    convFrom: LS.get('convFrom', {}),
-    convTo: LS.get('convTo', {}),
-    convInput: '1',
-    // currency
-    rates: LS.get('rates', null),  // { base, rates, fetchedAt }
-  };
+/* ---------- Tariff data (indicative) ---------- */
+const TARIFF = {
+  // Electricity — residential retail slabs, BDT per kWh (unit).
+  electricity: {
+    lifeline: { limit: 50, rate: 4.63 }, // whole bill at this rate if total <= 50 units
+    slabs: [
+      { upto: 75,       rate: 5.26 },
+      { upto: 200,      rate: 7.20 },
+      { upto: 300,      rate: 7.59 },
+      { upto: 400,      rate: 8.02 },
+      { upto: 600,      rate: 12.67 },
+      { upto: Infinity, rate: 14.61 },
+    ],
+    vat: 0.05,
+  },
+  // Dhaka WASA — BDT per 1000 L (1 unit = 1 m³).
+  water: {
+    domestic: 15.18,
+    commercial: 42.00,
+    // Sewerage charge billed at 100% of the water charge where a sewer line exists.
+    sewerRatio: 1.0,
+  },
+  // Titas gas.
+  gas: {
+    meteredRate: 18.00, // BDT per m³ (domestic metered)
+    flat: { single: 990, double: 1080 }, // BDT/month, non-metered
+  },
+};
 
-  // ---------- helpers ----------
-  const $ = (sel) => document.querySelector(sel);
-  const el = (tag, props = {}, kids = []) => {
-    const n = document.createElement(tag);
-    for (const k in props) {
-      if (k === 'class') n.className = props[k];
-      else if (k === 'dataset') Object.assign(n.dataset, props[k]);
-      else if (k in n) n[k] = props[k];
-      else n.setAttribute(k, props[k]);
-    }
-    for (const c of kids) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-    return n;
-  };
-  const haptic = (ms = 8) => { if (navigator.vibrate) navigator.vibrate(ms); };
+/* ---------- Helpline directory ---------- */
+const DIRECTORY = [
+  {
+    group: 'Emergency',
+    items: [
+      { name: 'National Emergency', desc: 'Police · Fire · Ambulance', num: '999' },
+      { name: 'Fire Service & Civil Defence', desc: 'Control room', num: '102' },
+      { name: 'Ambulance (Govt.)', desc: 'Health hotline', num: '16263' },
+    ],
+  },
+  {
+    group: 'Electricity',
+    items: [
+      { name: 'DPDC', desc: 'Dhaka Power Distribution Co.', num: '16116' },
+      { name: 'DESCO', desc: 'Dhaka Electric Supply Co.', num: '16120' },
+      { name: 'BPDB', desc: 'Bangladesh Power Dev. Board', num: '16200' },
+    ],
+  },
+  {
+    group: 'Water & Gas',
+    items: [
+      { name: 'Dhaka WASA', desc: 'Water & sewerage', num: '16162' },
+      { name: 'Titas Gas', desc: 'Gas supply & leak report', num: '16496' },
+    ],
+  },
+  {
+    group: 'Civic',
+    items: [
+      { name: 'Dhaka North City Corp.', desc: 'DNCC hotline', num: '333' },
+      { name: 'Dhaka South City Corp.', desc: 'DSCC hotline', num: '333' },
+      { name: 'Govt. Info & Services', desc: 'National helpline', num: '333' },
+    ],
+  },
+];
 
-  // ---------- number formatting ----------
-  function fmtNum(x) {
-    if (x === '' || x == null || Number.isNaN(x)) return '0';
-    if (typeof x === 'string') return x;
-    if (!Number.isFinite(x)) return x > 0 ? '∞' : '-∞';
-    const abs = Math.abs(x);
-    if (abs !== 0 && (abs >= 1e15 || abs < 1e-9)) return x.toExponential(8).replace(/\.?0+e/, 'e');
-    // round at 12 sig figs to avoid 0.1+0.2 weirdness
-    const rounded = Math.round(x * 1e12) / 1e12;
-    let s = String(rounded);
-    if (s.includes('e')) return s;
-    // grouping for integer part
-    const [intP, decP] = s.split('.');
-    const sign = intP.startsWith('-') ? '-' : '';
-    const intAbs = sign ? intP.slice(1) : intP;
-    const grouped = intAbs.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return sign + grouped + (decP ? '.' + decP : '');
-  }
+const TIPS = [
+  { ic: '💡', t: 'Switch to LED', d: 'Replacing one 60W incandescent bulb with a 9W LED can cut that light’s power use by ~85% — and LEDs keep you in lower tariff slabs.' },
+  { ic: '❄️', t: 'AC at 24–26°C', d: 'Each degree below 24°C raises consumption noticeably. 25°C with a fan feels the same and keeps units down.' },
+  { ic: '🔌', t: 'Kill standby load', d: 'TVs, chargers and set-top boxes draw power on standby. Use a switched power strip and turn it off at night.' },
+  { ic: '🚿', t: 'Fix the dripping tap', d: 'A single leaking tap can waste 60+ litres a day. WASA bills by 1000 L units — small leaks add real Taka.' },
+  { ic: '🔥', t: 'Gas: cover the pot', d: 'Cooking with lids on and right-sized flames cuts gas use. Metered users pay per m³, so it shows up directly.' },
+  { ic: '📅', t: 'Pay before the date', d: 'Add your bills to “My Bills” and clear them before the due date to dodge late surcharges and reconnection fees.' },
+  { ic: '🧾', t: 'Read your own meter', d: 'Note the meter reading monthly. If the bill jumps without higher usage, raise it with the distributor early.' },
+];
 
-  // ============================================================
-  // EXPRESSION ENGINE — tokenize → shunting yard → evaluate
-  // ============================================================
-  const OPS = {
-    '+': { p: 1, a: 'L', fn: (a, b) => a + b, ar: 2 },
-    '-': { p: 1, a: 'L', fn: (a, b) => a - b, ar: 2 },
-    '*': { p: 2, a: 'L', fn: (a, b) => a * b, ar: 2 },
-    '/': { p: 2, a: 'L', fn: (a, b) => a / b, ar: 2 },
-    '%': { p: 2, a: 'L', fn: (a, b) => a - Math.floor(a / b) * b, ar: 2 }, // mod
-    '^': { p: 4, a: 'R', fn: (a, b) => Math.pow(a, b), ar: 2 },
-    'u-': { p: 3, a: 'R', fn: (a) => -a, ar: 1 },
-    '!': { p: 5, a: 'L', fn: (a) => factorial(a), ar: 1 },
-  };
+/* ---------- Helpers ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+const screen = $('#screen');
+const fmt = (n) => {
+  const r = Math.round((n + Number.EPSILON) * 100) / 100;
+  return r.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+const fmt0 = (n) => Math.round(n).toLocaleString('en-US');
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  function factorial(n) {
-    if (n < 0 || n !== Math.floor(n)) return NaN;
-    if (n > 170) return Infinity;
-    let r = 1;
-    for (let i = 2; i <= n; i++) r *= i;
-    return r;
-  }
+let toastTimer;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2400);
+}
 
-  const FUNCS = {
-    sin: (x) => Math.sin(toRad(x)),
-    cos: (x) => Math.cos(toRad(x)),
-    tan: (x) => Math.tan(toRad(x)),
-    asin: (x) => fromRad(Math.asin(x)),
-    acos: (x) => fromRad(Math.acos(x)),
-    atan: (x) => fromRad(Math.atan(x)),
-    sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
-    ln: Math.log,
-    log: Math.log10,
-    sqrt: Math.sqrt,
-    cbrt: Math.cbrt,
-    exp: Math.exp,
-    abs: Math.abs,
-    floor: Math.floor, ceil: Math.ceil, round: Math.round,
-    sign: Math.sign,
-  };
+/* ---------- Bill store (localStorage) ---------- */
+const STORE_KEY = 'dus.bills.v1';
+function loadBills() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch { return []; }
+}
+function saveBills(bills) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(bills));
+}
 
-  const CONSTS = { 'π': Math.PI, 'pi': Math.PI, 'e': Math.E };
+/* ============================================================
+   Estimation engine
+   ============================================================ */
+function calcElectricity(units, opts) {
+  const t = TARIFF.electricity;
+  const lines = [];
+  let energy = 0;
 
-  function toRad(x) { return state.angle === 'DEG' ? x * Math.PI / 180 : x; }
-  function fromRad(x) { return state.angle === 'DEG' ? x * 180 / Math.PI : x; }
-
-  function tokenize(input) {
-    const tokens = [];
-    const s = input.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')
-                   .replace(/√/g, 'sqrt').replace(/π/g, 'π');
-    let i = 0;
-    while (i < s.length) {
-      const c = s[i];
-      if (c === ' ') { i++; continue; }
-      // number
-      if (/[0-9.]/.test(c)) {
-        let j = i, sawDot = false, sawE = false;
-        while (j < s.length) {
-          const ch = s[j];
-          if (/[0-9]/.test(ch)) { j++; continue; }
-          if (ch === '.' && !sawDot && !sawE) { sawDot = true; j++; continue; }
-          if ((ch === 'e' || ch === 'E') && !sawE) { sawE = true; j++; if (s[j] === '+' || s[j] === '-') j++; continue; }
-          break;
-        }
-        const num = parseFloat(s.slice(i, j));
-        if (Number.isNaN(num)) throw new Error('bad number');
-        tokens.push({ t: 'num', v: num });
-        i = j; continue;
+  if (units <= t.lifeline.limit) {
+    energy = units * t.lifeline.rate;
+    lines.push({ k: 'Lifeline energy', s: `${fmt0(units)} units × ৳${t.lifeline.rate}`, v: energy });
+  } else {
+    let prev = 0;
+    for (const slab of t.slabs) {
+      if (units <= prev) break;
+      const qty = Math.min(units, slab.upto) - prev;
+      if (qty > 0) {
+        const amt = qty * slab.rate;
+        energy += amt;
+        const hi = slab.upto === Infinity ? '∞' : fmt0(slab.upto);
+        lines.push({ k: `Slab ${fmt0(prev + 1)}–${hi}`, s: `${fmt0(qty)} units × ৳${slab.rate}`, v: amt });
       }
-      // identifier / function / constant
-      if (/[a-zπ]/i.test(c)) {
-        let j = i;
-        while (j < s.length && /[a-z0-9π]/i.test(s[j])) j++;
-        const id = s.slice(i, j);
-        if (id in FUNCS) tokens.push({ t: 'fn', v: id });
-        else if (id in CONSTS) tokens.push({ t: 'num', v: CONSTS[id] });
-        else throw new Error('unknown ' + id);
-        i = j; continue;
-      }
-      if (c === '(' || c === ')') { tokens.push({ t: c }); i++; continue; }
-      if (c === ',') { tokens.push({ t: ',' }); i++; continue; }
-      if (c in OPS || c === '!') {
-        // unary minus detection
-        const prev = tokens[tokens.length - 1];
-        if (c === '-' && (!prev || prev.t === 'op' || prev.t === '(' || prev.t === ',' || prev.t === 'fn')) {
-          tokens.push({ t: 'op', v: 'u-' });
-        } else if (c === '!') {
-          tokens.push({ t: 'op', v: '!' });
-        } else {
-          tokens.push({ t: 'op', v: c });
-        }
-        i++; continue;
-      }
-      throw new Error('bad char ' + c);
-    }
-    return tokens;
-  }
-
-  function toRPN(tokens) {
-    const out = [], stack = [];
-    for (const tk of tokens) {
-      if (tk.t === 'num') out.push(tk);
-      else if (tk.t === 'fn') stack.push(tk);
-      else if (tk.t === 'op') {
-        const op = OPS[tk.v];
-        while (stack.length) {
-          const top = stack[stack.length - 1];
-          if (top.t === 'fn') { out.push(stack.pop()); continue; }
-          if (top.t === 'op') {
-            const topOp = OPS[top.v];
-            if ((op.a === 'L' && topOp.p >= op.p) || (op.a === 'R' && topOp.p > op.p)) {
-              out.push(stack.pop()); continue;
-            }
-          }
-          break;
-        }
-        stack.push(tk);
-      }
-      else if (tk.t === '(') stack.push(tk);
-      else if (tk.t === ')') {
-        while (stack.length && stack[stack.length - 1].t !== '(') out.push(stack.pop());
-        if (!stack.length) throw new Error('mismatched )');
-        stack.pop(); // remove (
-        if (stack.length && stack[stack.length - 1].t === 'fn') out.push(stack.pop());
-      }
-    }
-    while (stack.length) {
-      const top = stack.pop();
-      if (top.t === '(') throw new Error('mismatched (');
-      out.push(top);
-    }
-    return out;
-  }
-
-  function evalRPN(rpn) {
-    const st = [];
-    for (const tk of rpn) {
-      if (tk.t === 'num') st.push(tk.v);
-      else if (tk.t === 'fn') {
-        if (!st.length) throw new Error('arity');
-        const a = st.pop();
-        st.push(FUNCS[tk.v](a));
-      }
-      else if (tk.t === 'op') {
-        const op = OPS[tk.v];
-        if (op.ar === 1) {
-          if (!st.length) throw new Error('arity');
-          st.push(op.fn(st.pop()));
-        } else {
-          if (st.length < 2) throw new Error('arity');
-          const b = st.pop(), a = st.pop();
-          st.push(op.fn(a, b));
-        }
-      }
-    }
-    if (st.length !== 1) throw new Error('bad expr');
-    return st[0];
-  }
-
-  function evaluate(expr) {
-    if (!expr || !expr.trim()) return null;
-    // close any unclosed parens for live preview
-    let s = expr;
-    const opens = (s.match(/\(/g) || []).length, closes = (s.match(/\)/g) || []).length;
-    if (opens > closes) s += ')'.repeat(opens - closes);
-    // strip trailing operator for live preview
-    s = s.replace(/[+\-*/^×÷−]\s*$/, '').replace(/[a-z]+\($/i, '');
-    if (!s.trim()) return null;
-    const tokens = tokenize(s);
-    if (!tokens.length) return null;
-    return evalRPN(toRPN(tokens));
-  }
-
-  // ============================================================
-  // CALCULATOR INPUT (std + sci)
-  // ============================================================
-  // mapping of UI symbols → expression chars
-  function press(key) {
-    haptic();
-    // after = → next digit resets, op continues
-    if (key.type === 'digit' || key.type === 'dot' || key.type === 'const' || key.type === 'fn' || key.type === 'open') {
-      if (state.justEvaluated) { state.expr = ''; state.justEvaluated = false; }
-    } else if (key.type === 'op' || key.type === 'close' || key.type === 'postfix') {
-      if (state.justEvaluated) {
-        // continue from result
-        state.expr = String(toRawNumber(state.result));
-        state.justEvaluated = false;
-      }
-    }
-
-    switch (key.type) {
-      case 'digit':
-        state.expr += key.v;
-        break;
-      case 'dot':
-        // only one dot per current number
-        if (!/(\d*\.\d*)$/.test(state.expr.split(/[^\d.]/).pop() || '')) {
-          // need to be more careful — find current number token
-        }
-        if (currentNumberHasDot()) break;
-        if (state.expr === '' || /[^\d.]$/.test(state.expr)) state.expr += '0';
-        state.expr += '.';
-        break;
-      case 'op': {
-        // replace trailing op
-        if (/[+\-*/^×÷−]$/.test(state.expr)) state.expr = state.expr.slice(0, -1);
-        if (state.expr === '' && key.v !== '-') {
-          // allow leading - only
-          break;
-        }
-        state.expr += key.v;
-        break;
-      }
-      case 'fn':
-        state.expr += key.v + '(';
-        break;
-      case 'const':
-        state.expr += key.v;
-        break;
-      case 'open':
-        state.expr += '(';
-        break;
-      case 'close':
-        state.expr += ')';
-        break;
-      case 'postfix':
-        state.expr += key.v;
-        break;
-      case 'sign':
-        toggleSign();
-        break;
-      case 'percent':
-        applyPercent();
-        break;
-      case 'recipinv':
-        wrapResult((v) => 1 / v, '1/(', ')');
-        break;
-      case 'square':
-        wrapResult((v) => v * v, '(', ')^2');
-        break;
-      case 'back':
-        state.expr = state.expr.slice(0, -1);
-        break;
-      case 'clear':
-        state.expr = '';
-        state.result = '0';
-        state.justEvaluated = false;
-        break;
-      case 'equals':
-        doEquals();
-        break;
-      case 'mem':
-        memAction(key.v);
-        break;
-      case 'invtog':
-        state.inv = !state.inv;
-        renderPad();
-        return;
-      case 'angle':
-        state.angle = state.angle === 'DEG' ? 'RAD' : 'DEG';
-        LS.set('angle', state.angle);
-        break;
-    }
-    refreshDisplay();
-  }
-
-  function currentNumberHasDot() {
-    const m = state.expr.match(/(\d+\.\d*|\.\d+|\d+)$/);
-    return m && m[0].includes('.');
-  }
-
-  function toggleSign() {
-    // negate last number in expression
-    const m = state.expr.match(/(-?\d*\.?\d+(?:e[+-]?\d+)?)$/i);
-    if (m) {
-      const start = state.expr.length - m[0].length;
-      let num = m[0];
-      if (num.startsWith('-')) num = num.slice(1);
-      else num = '-' + num;
-      // wrap with parens if preceded by something
-      if (start > 0) {
-        const prev = state.expr[start - 1];
-        if (/[\d)]/.test(prev)) {
-          // can't directly negate; insert *(-1)? rare. just prefix.
-        }
-      }
-      state.expr = state.expr.slice(0, start) + num;
-    } else if (state.justEvaluated || state.expr === '') {
-      const cur = toRawNumber(state.result);
-      state.expr = String(-cur);
-      state.justEvaluated = false;
+      prev = slab.upto;
     }
   }
 
-  function applyPercent() {
-    // x% → x/100
-    const m = state.expr.match(/(-?\d*\.?\d+(?:e[+-]?\d+)?)$/i);
-    if (m) {
-      const start = state.expr.length - m[0].length;
-      state.expr = state.expr.slice(0, start) + '(' + m[0] + '/100)';
-    } else if (state.justEvaluated) {
-      state.expr = '(' + toRawNumber(state.result) + '/100)';
-      state.justEvaluated = false;
-    }
+  const demand = Math.max(0, opts.demand || 0);
+  const meter = Math.max(0, opts.meter || 0);
+  if (demand) lines.push({ k: 'Demand charge', s: 'Sanctioned load', v: demand });
+  if (meter)  lines.push({ k: 'Meter rent', s: 'Monthly', v: meter });
+
+  const vat = (energy + demand) * t.vat;
+  lines.push({ k: 'VAT', s: '5% on energy + demand', v: vat });
+
+  const total = energy + demand + meter + vat;
+  return { total, lines, sub: `${fmt0(units)} units this cycle` };
+}
+
+function calcWater(volume, opts) {
+  const t = TARIFF.water;
+  const rate = opts.commercial ? t.commercial : t.domestic;
+  const lines = [];
+  const water = volume * rate;
+  lines.push({ k: 'Water charge', s: `${fmt0(volume)} × 1000 L × ৳${rate}`, v: water });
+
+  let sewer = 0;
+  if (opts.sewer) {
+    sewer = water * t.sewerRatio;
+    lines.push({ k: 'Sewerage charge', s: '100% of water charge', v: sewer });
+  }
+  const total = water + sewer;
+  return { total, lines, sub: `${fmt0(volume * 1000)} litres · ${opts.commercial ? 'commercial' : 'domestic'}` };
+}
+
+function calcGas(opts) {
+  const t = TARIFF.gas;
+  const lines = [];
+  let total, sub;
+  if (opts.metered) {
+    const vol = Math.max(0, opts.volume || 0);
+    total = vol * t.meteredRate;
+    lines.push({ k: 'Metered gas', s: `${fmt0(vol)} m³ × ৳${t.meteredRate}`, v: total });
+    sub = `${fmt0(vol)} m³ metered`;
+  } else {
+    total = opts.burner === 'double' ? t.flat.double : t.flat.single;
+    const label = opts.burner === 'double' ? 'Double burner' : 'Single burner';
+    lines.push({ k: `${label} (flat)`, s: 'Monthly, non-metered', v: total });
+    sub = `${label} · non-metered`;
+  }
+  return { total, lines, sub };
+}
+
+/* ============================================================
+   Views
+   ============================================================ */
+let activeService = 'electricity';
+
+const SVC_META = {
+  electricity: { label: 'Electricity', icon: '<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>', color: '#c77700' },
+  water:       { label: 'Water',       icon: '<path d="M12 2.5S5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5Z"/>', color: '#2a7de1' },
+  gas:         { label: 'Gas',         icon: '<path d="M8.5 14.5A4 4 0 0 0 16 13c0-3-3-4-2.5-8C9 7 8 9.5 8 11c0-1-1-2-1-2a4 4 0 0 0 1.5 5.5Z"/>', color: '#d62b3a' },
+};
+
+function svcIcon(key, size = 22) {
+  const m = SVC_META[key];
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${m.icon}</svg>`;
+}
+
+function renderEstimate() {
+  const svc = (key) => `
+    <button class="svc ${key === activeService ? 'is-active' : ''}" data-svc="${key}" type="button">
+      ${svcIcon(key, 26)}<span>${SVC_META[key].label}</span>
+    </button>`;
+
+  let form = '';
+  if (activeService === 'electricity') {
+    form = `
+      <div class="field">
+        <label for="e-units">Units consumed <span class="hint">(kWh this month)</span></label>
+        <div class="input-group">
+          <input class="input" id="e-units" type="number" inputmode="decimal" min="0" placeholder="e.g. 250" />
+          <span class="unit">kWh</span>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="e-demand">Demand charge <span class="hint">(৳)</span></label>
+          <input class="input" id="e-demand" type="number" inputmode="decimal" min="0" placeholder="0" />
+        </div>
+        <div class="field">
+          <label for="e-meter">Meter rent <span class="hint">(৳)</span></label>
+          <input class="input" id="e-meter" type="number" inputmode="decimal" min="0" placeholder="0" />
+        </div>
+      </div>`;
+  } else if (activeService === 'water') {
+    form = `
+      <div class="field">
+        <label for="w-vol">Water used <span class="hint">(1000 L units = m³)</span></label>
+        <div class="input-group">
+          <input class="input" id="w-vol" type="number" inputmode="decimal" min="0" placeholder="e.g. 15" />
+          <span class="unit">m³</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="w-type">Connection type</label>
+        <select class="input" id="w-type">
+          <option value="domestic">Domestic / residential</option>
+          <option value="commercial">Commercial / industrial</option>
+        </select>
+      </div>
+      <label class="check"><input type="checkbox" id="w-sewer" checked /> Add sewerage charge (100%)</label>`;
+  } else {
+    form = `
+      <div class="field">
+        <label for="g-mode">Billing type</label>
+        <select class="input" id="g-mode">
+          <option value="flat">Non-metered (flat monthly)</option>
+          <option value="metered">Metered (per m³)</option>
+        </select>
+      </div>
+      <div class="field" id="g-flat-field">
+        <label for="g-burner">Burners</label>
+        <select class="input" id="g-burner">
+          <option value="single">Single burner — ৳${TARIFF.gas.flat.single}/mo</option>
+          <option value="double">Double burner — ৳${TARIFF.gas.flat.double}/mo</option>
+        </select>
+      </div>
+      <div class="field" id="g-metered-field" hidden>
+        <label for="g-vol">Gas used <span class="hint">(cubic metres)</span></label>
+        <div class="input-group">
+          <input class="input" id="g-vol" type="number" inputmode="decimal" min="0" placeholder="e.g. 88" />
+          <span class="unit">m³</span>
+        </div>
+      </div>`;
   }
 
-  function wrapResult(fn, pre, post) {
-    if (state.justEvaluated) {
-      state.expr = pre + toRawNumber(state.result) + post;
-      state.justEvaluated = false;
-    } else {
-      // wrap trailing number
-      const m = state.expr.match(/(-?\d*\.?\d+(?:e[+-]?\d+)?|\)[^)]*)$/);
-      if (m) {
-        const start = state.expr.length - m[0].length;
-        state.expr = state.expr.slice(0, start) + pre + m[0] + post;
-      } else {
-        state.expr += pre;
-      }
-    }
-  }
+  screen.innerHTML = `
+    <section class="view">
+      <div class="view-head">
+        <h1>Bill estimator</h1>
+        <p>Estimate your monthly utility bill with current Dhaka tariff slabs.</p>
+      </div>
+      <div class="svc-grid">${svc('electricity')}${svc('water')}${svc('gas')}</div>
+      <div class="card">
+        <h2>${SVC_META[activeService].label} details</h2>
+        ${form}
+        <button class="btn" id="calcBtn" type="button">Calculate bill</button>
+      </div>
+      <div id="estResult"></div>
+      <p class="note"><strong>Heads up:</strong> rates are indicative retail slabs for estimation only. Your official printed bill — including any arrears, rebate, surcharge or service charge — is the final word.</p>
+    </section>`;
 
-  function toRawNumber(s) {
-    if (typeof s === 'number') return s;
-    return parseFloat(String(s).replace(/,/g, ''));
-  }
+  // wire service chooser
+  screen.querySelectorAll('.svc').forEach((b) =>
+    b.addEventListener('click', () => { activeService = b.dataset.svc; renderEstimate(); }));
 
-  function doEquals() {
-    if (!state.expr.trim()) return;
-    try {
-      const tokens = tokenize(state.expr);
-      const v = evalRPN(toRPN(tokens));
-      if (!Number.isFinite(v) && v !== Infinity && v !== -Infinity) throw new Error('NaN');
-      addHistory(state.expr, v);
-      state.result = fmtNum(v);
-      state.expr = state.result;
-      state.justEvaluated = true;
-      flashDisplay();
-    } catch (err) {
-      showError();
-    }
-  }
-
-  function memAction(action) {
-    const cur = toRawNumber(state.result) || 0;
-    switch (action) {
-      case 'MC': state.memory = 0; break;
-      case 'MR':
-        if (state.justEvaluated) { state.expr = ''; state.justEvaluated = false; }
-        state.expr += String(state.memory);
-        break;
-      case 'M+': state.memory += cur; break;
-      case 'M-': state.memory -= cur; break;
-      case 'MS': state.memory = cur; break;
-    }
-    LS.set('memory', state.memory);
-    refreshStatus();
-  }
-
-  // ============================================================
-  // HISTORY
-  // ============================================================
-  function addHistory(expr, val) {
-    state.history.unshift({ expr, val: fmtNum(val), t: Date.now() });
-    if (state.history.length > 100) state.history.length = 100;
-    LS.set('history', state.history);
-    renderHistory();
-  }
-
-  function renderHistory() {
-    const list = $('#historyList');
-    list.innerHTML = '';
-    if (!state.history.length) {
-      list.appendChild(el('li', { class: 'empty' }, ['NO RECORDS // TYPE TO BEGIN']));
-      return;
-    }
-    for (const h of state.history) {
-      const li = el('li', {}, [
-        el('div', { class: 'h-expr' }, [h.expr]),
-        el('div', { class: 'h-res' }, ['= ' + h.val]),
-      ]);
-      li.addEventListener('click', () => {
-        state.expr = h.val.replace(/,/g, '');
-        state.justEvaluated = true;
-        state.result = h.val;
-        $('#history').classList.remove('is-open');
-        refreshDisplay();
-      });
-      list.appendChild(li);
-    }
-  }
-
-  // ============================================================
-  // PROGRAMMER MODE
-  // ============================================================
-  const PROG = {
-    BASE_CHARS: { 2: '01', 8: '01234567', 10: '0123456789', 16: '0123456789ABCDEF' },
-    parse(s, base) {
-      if (!s) return 0;
-      const neg = s.startsWith('-');
-      const body = neg ? s.slice(1) : s;
-      if (body === '') return 0;
-      const v = parseInt(body, base);
-      if (Number.isNaN(v)) return null;
-      return neg ? -v : v;
-    },
-    fmt(v, base) {
-      if (v == null || Number.isNaN(v)) return '—';
-      const sign = v < 0 ? '-' : '';
-      let n = Math.abs(Math.trunc(v));
-      let s = n.toString(base).toUpperCase();
-      if (base === 2) s = s.replace(/(\d{4})(?=(\d{4})+$)/g, '$1 ');
-      else if (base === 16) s = s.replace(/(.{4})(?=(.{4})+$)/g, '$1 ');
-      return sign + s;
-    },
-  };
-
-  let progBuf = '';  // current input in current base
-  let progAcc = null; // accumulated value
-  let progOp = null;  // pending op
-
-  function progPress(key) {
-    haptic();
-    switch (key.type) {
-      case 'pdigit': {
-        if (state.justEvaluated) { progBuf = ''; state.justEvaluated = false; }
-        if (!PROG.BASE_CHARS[state.progBase].includes(key.v)) return;
-        progBuf += key.v;
-        break;
-      }
-      case 'pbase':
-        // convert buf to int, switch base, redisplay
-        if (progBuf) {
-          const v = PROG.parse(progBuf, state.progBase);
-          state.progBase = key.v;
-          progBuf = PROG.fmt(v, key.v).replace(/\s/g, '');
-        } else {
-          state.progBase = key.v;
-        }
-        LS.set('progBase', state.progBase);
-        refreshStatus();
-        renderPad();
-        break;
-      case 'pop': {
-        const v = PROG.parse(progBuf, state.progBase);
-        if (v != null) {
-          if (progAcc == null) progAcc = v;
-          else if (progOp) progAcc = progApply(progAcc, v, progOp);
-        }
-        progOp = key.v;
-        progBuf = '';
-        state.justEvaluated = false;
-        break;
-      }
-      case 'pnot': {
-        let v = PROG.parse(progBuf, state.progBase);
-        if (v == null && progAcc != null) v = progAcc;
-        if (v == null) v = 0;
-        v = ~v;
-        progBuf = PROG.fmt(v, state.progBase).replace(/\s/g, '');
-        state.justEvaluated = true;
-        break;
-      }
-      case 'pequals': {
-        const v = PROG.parse(progBuf, state.progBase);
-        if (v != null) {
-          let r = v;
-          if (progAcc != null && progOp) r = progApply(progAcc, v, progOp);
-          else if (progAcc != null && !progOp) r = progAcc;
-          addHistory(progFmtExpr(progAcc, progOp, v), r);
-          progBuf = PROG.fmt(r, state.progBase).replace(/\s/g, '');
-          progAcc = null; progOp = null;
-          state.justEvaluated = true;
-          flashDisplay();
-        }
-        break;
-      }
-      case 'pback':
-        progBuf = progBuf.slice(0, -1);
-        state.justEvaluated = false;
-        break;
-      case 'pclear':
-        progBuf = ''; progAcc = null; progOp = null; state.justEvaluated = false;
-        break;
-      case 'pneg': {
-        if (progBuf.startsWith('-')) progBuf = progBuf.slice(1);
-        else if (progBuf) progBuf = '-' + progBuf;
-        break;
-      }
-    }
-    refreshDisplay();
-  }
-
-  function progApply(a, b, op) {
-    a |= 0; b |= 0;
-    switch (op) {
-      case '+': return (a + b) | 0;
-      case '-': return (a - b) | 0;
-      case '*': return Math.imul(a, b);
-      case '/': return b === 0 ? 0 : (a / b) | 0;
-      case '%': return b === 0 ? 0 : (a % b) | 0;
-      case 'AND': return a & b;
-      case 'OR': return a | b;
-      case 'XOR': return a ^ b;
-      case '<<': return a << (b & 31);
-      case '>>': return a >> (b & 31);
-    }
-    return 0;
-  }
-
-  function progFmtExpr(a, op, b) {
-    const ar = a == null ? '' : PROG.fmt(a, state.progBase);
-    const br = PROG.fmt(b, state.progBase);
-    if (!op) return br;
-    return `${ar} ${op} ${br}`;
-  }
-
-  // ============================================================
-  // CONVERTER MODE
-  // ============================================================
-  // factor = "value in base unit"
-  const UNITS = {
-    length: { base: 'm', units: {
-      mm: 0.001, cm: 0.01, m: 1, km: 1000,
-      in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344, nmi: 1852,
-    }},
-    mass: { base: 'kg', units: {
-      mg: 1e-6, g: 0.001, kg: 1, t: 1000,
-      oz: 0.028349523125, lb: 0.45359237, st: 6.35029318,
-    }},
-    temperature: { base: 'C', units: { C: 1, F: 1, K: 1 }, custom: true },
-    volume: { base: 'L', units: {
-      mL: 0.001, L: 1, 'm³': 1000,
-      'tsp(US)': 0.00492892159375, 'tbsp(US)': 0.01478676478125,
-      'floz(US)': 0.0295735295625, 'cup(US)': 0.2365882365,
-      'pt(US)': 0.473176473, 'qt(US)': 0.946352946,
-      'gal(US)': 3.785411784, 'gal(UK)': 4.54609,
-    }},
-    area: { base: 'm²', units: {
-      'mm²': 1e-6, 'cm²': 1e-4, 'm²': 1, 'ha': 10000, 'km²': 1e6,
-      'in²': 0.00064516, 'ft²': 0.09290304, 'yd²': 0.83612736,
-      'ac': 4046.8564224, 'mi²': 2589988.110336,
-    }},
-    speed: { base: 'm/s', units: {
-      'm/s': 1, 'km/h': 1 / 3.6, 'mph': 0.44704, 'ft/s': 0.3048, 'knot': 0.514444444,
-    }},
-    time: { base: 's', units: {
-      ms: 0.001, s: 1, min: 60, h: 3600, day: 86400, week: 604800,
-      month: 2629800, year: 31557600,
-    }},
-    data: { base: 'B', units: {
-      bit: 0.125, B: 1, KB: 1024, MB: 1048576, GB: 1073741824, TB: 1099511627776,
-    }},
-    currency: { base: 'USD', units: {
-      USD: 1, EUR: 0.92, GBP: 0.79, JPY: 156, CNY: 7.2, INR: 83.5,
-      BDT: 110, AUD: 1.53, CAD: 1.37, CHF: 0.89, HKD: 7.82, SGD: 1.34,
-      NZD: 1.66, KRW: 1380, BRL: 5.05, MXN: 17, ZAR: 18.4, RUB: 92,
-      AED: 3.67, SAR: 3.75, TRY: 32.3, IDR: 16000, MYR: 4.72, THB: 36.5,
-      PHP: 58.5, VND: 25400, PKR: 278, EGP: 49, NGN: 1500, SEK: 10.6,
-      NOK: 10.7, DKK: 6.87, PLN: 3.95, CZK: 22.8, HUF: 358, ILS: 3.72,
-    }, dynamic: true },
-  };
-
-  function tempConvert(v, from, to) {
-    let c;
-    if (from === 'C') c = v;
-    else if (from === 'F') c = (v - 32) * 5 / 9;
-    else if (from === 'K') c = v - 273.15;
-    if (to === 'C') return c;
-    if (to === 'F') return c * 9 / 5 + 32;
-    if (to === 'K') return c + 273.15;
-  }
-
-  function convertValue(v, cat, from, to) {
-    if (cat === 'temperature') return tempConvert(v, from, to);
-    const u = UNITS[cat].units;
-    if (!(from in u) || !(to in u)) return NaN;
-    return v * u[from] / u[to];
-  }
-
-  function defaultUnits(cat) {
-    const keys = Object.keys(UNITS[cat].units);
-    return { from: keys[0], to: keys[1] || keys[0] };
-  }
-
-  // currency fetching
-  async function refreshRates(force) {
-    const FRESH = 1000 * 60 * 60 * 12; // 12h
-    const now = Date.now();
-    if (!force && state.rates && (now - state.rates.fetchedAt) < FRESH) return;
-    try {
-      const r = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
-      const j = await r.json();
-      if (j && j.rates) {
-        state.rates = { base: 'USD', rates: j.rates, fetchedAt: now };
-        LS.set('rates', state.rates);
-        // merge into UNITS.currency.units
-        Object.assign(UNITS.currency.units, j.rates);
-        UNITS.currency.units.USD = 1;
-        refreshStatus();
-        if (state.mode === 'conv' && state.convCat === 'currency') renderConverter();
-      }
-    } catch {}
-  }
-
-  function applyCachedRates() {
-    if (state.rates && state.rates.rates) {
-      Object.assign(UNITS.currency.units, state.rates.rates);
-      UNITS.currency.units.USD = 1;
-    }
-  }
-
-  // ============================================================
-  // UI RENDERING
-  // ============================================================
-  function renderPad() {
-    const pad = $('#pad');
-    pad.innerHTML = '';
-    pad.className = 'pad';
-
-    if (state.mode === 'conv') {
-      renderConverter();
-      return;
-    }
-    if (state.mode === 'prog') {
-      renderProgrammer();
-      return;
-    }
-
-    // STD + SCI share the bottom rows
-    const stdRows = [
-      [
-        ['AC', 'clear', 'danger'],
-        ['⌫', 'back', 'fn'],
-        ['%', 'percent', 'fn'],
-        ['÷', 'op', 'op', '/'],
-      ],
-      [['7','digit','',''],['8','digit','',''],['9','digit','',''],['×','op','op','*']],
-      [['4','digit','',''],['5','digit','',''],['6','digit','',''],['−','op','op','-']],
-      [['1','digit','',''],['2','digit','',''],['3','digit','',''],['+','op','op','+']],
-      [['±','sign','fn',''],['0','digit','',''],['.','dot','',''],['=','equals','eq','']],
-    ];
-
-    const sciTop = [
-      [
-        [state.inv ? 'INV·' : 'INV', 'invtog', 'toggle' + (state.inv ? ' on' : ''), ''],
-        ['MC', 'mem', 'acc', 'MC'],
-        ['MR', 'mem', 'acc', 'MR'],
-        ['M+', 'mem', 'acc', 'M+'],
-        ['M−', 'mem', 'acc', 'M-'],
-      ],
-      [
-        [state.inv ? 'sin⁻¹' : 'sin', 'fn', 'fn', state.inv ? 'asin' : 'sin'],
-        [state.inv ? 'cos⁻¹' : 'cos', 'fn', 'fn', state.inv ? 'acos' : 'cos'],
-        [state.inv ? 'tan⁻¹' : 'tan', 'fn', 'fn', state.inv ? 'atan' : 'tan'],
-        [state.inv ? '10^' : 'log', state.inv ? 'fn' : 'fn', 'fn', state.inv ? 'pow10' : 'log'],
-        [state.inv ? 'eˣ' : 'ln', state.inv ? 'fn' : 'fn', 'fn', state.inv ? 'exp' : 'ln'],
-      ],
-      [
-        ['π', 'const', 'fn', 'π'],
-        ['e', 'const', 'fn', 'e'],
-        ['√', 'fn', 'fn', 'sqrt'],
-        ['x²', 'square', 'fn', ''],
-        ['x^y', 'op', 'fn', '^'],
-      ],
-      [
-        ['(', 'open', 'fn', ''],
-        [')', 'close', 'fn', ''],
-        ['n!', 'postfix', 'fn', '!'],
-        ['1/x', 'recipinv', 'fn', ''],
-        ['EE', 'digit', 'fn', 'e'],
-      ],
-    ];
-
-    // pow10 / exp special — define them by mapping to fn names
-    if (state.inv) {
-      FUNCS.pow10 = (x) => Math.pow(10, x);
-    }
-
-    const rows = state.mode === 'sci' ? [...sciTop, ...stdRows] : stdRows;
-
-    rows.forEach((row) => {
-      const cols = row.length;
-      const rowEl = el('div', { class: 'row cols-' + cols });
-      row.forEach(([label, type, klass, value]) => {
-        const btn = el('button', { class: 'key ' + (klass || ''), type: 'button' }, [label]);
-        btn.addEventListener('click', () => {
-          press({ type, v: value || label });
-        });
-        rowEl.appendChild(btn);
-      });
-      pad.appendChild(rowEl);
+  if (activeService === 'gas') {
+    const mode = $('#g-mode');
+    mode.addEventListener('change', () => {
+      const metered = mode.value === 'metered';
+      $('#g-metered-field').hidden = !metered;
+      $('#g-flat-field').hidden = metered;
     });
   }
 
-  function renderConverter() {
-    const pad = $('#pad');
-    pad.innerHTML = '';
-    pad.className = 'pad';
+  $('#calcBtn').addEventListener('click', runEstimate);
+}
 
-    const cat = state.convCat;
-    const units = Object.keys(UNITS[cat].units);
-    if (!state.convFrom[cat] || !units.includes(state.convFrom[cat])) state.convFrom[cat] = units[0];
-    if (!state.convTo[cat] || !units.includes(state.convTo[cat])) state.convTo[cat] = units[1] || units[0];
-
-    const pane = el('div', { class: 'conv-pane' });
-
-    // category selector
-    const catSel = el('select', { class: 'select' });
-    Object.keys(UNITS).forEach((k) => {
-      const o = el('option', { value: k }, [k[0].toUpperCase() + k.slice(1)]);
-      if (k === cat) o.selected = true;
-      catSel.appendChild(o);
+function runEstimate() {
+  let res;
+  if (activeService === 'electricity') {
+    const units = parseFloat($('#e-units').value);
+    if (!(units >= 0)) return toast('Enter the units consumed');
+    res = calcElectricity(units, {
+      demand: parseFloat($('#e-demand').value) || 0,
+      meter: parseFloat($('#e-meter').value) || 0,
     });
-    catSel.addEventListener('change', () => {
-      state.convCat = catSel.value; LS.set('convCat', state.convCat);
-      renderConverter();
-      if (state.convCat === 'currency') refreshRates();
+  } else if (activeService === 'water') {
+    const vol = parseFloat($('#w-vol').value);
+    if (!(vol >= 0)) return toast('Enter the water used');
+    res = calcWater(vol, {
+      commercial: $('#w-type').value === 'commercial',
+      sewer: $('#w-sewer').checked,
     });
-    pane.appendChild(catSel);
-
-    // FROM row
-    const fromVal = el('input', { class: 'text-input', type: 'text', inputmode: 'decimal', value: state.convInput });
-    const fromSel = el('select', { class: 'select' });
-    units.forEach((u) => {
-      const o = el('option', { value: u }, [u]);
-      if (u === state.convFrom[cat]) o.selected = true;
-      fromSel.appendChild(o);
+  } else {
+    const metered = $('#g-mode').value === 'metered';
+    if (metered && !(parseFloat($('#g-vol').value) >= 0)) return toast('Enter the gas used');
+    res = calcGas({
+      metered,
+      volume: parseFloat($('#g-vol').value) || 0,
+      burner: $('#g-burner').value,
     });
-    const fromRow = el('div', { class: 'field' }, [fromVal, fromSel]);
-    pane.appendChild(fromRow);
+  }
 
-    // swap
-    const swap = el('button', { class: 'swap-btn', type: 'button' }, ['⇅  SWAP  ⇅']);
-    pane.appendChild(swap);
+  const rows = res.lines.map((l) => `
+    <li><span class="bd-key">${esc(l.k)}<small>${esc(l.s)}</small></span><span class="bd-val">৳ ${fmt(l.v)}</span></li>`).join('');
 
-    // TO row
-    const toVal = el('input', { class: 'text-input dest', type: 'text', readonly: true });
-    const toSel = el('select', { class: 'select' });
-    units.forEach((u) => {
-      const o = el('option', { value: u }, [u]);
-      if (u === state.convTo[cat]) o.selected = true;
-      toSel.appendChild(o);
-    });
-    const toRow = el('div', { class: 'field' }, [toVal, toSel]);
-    pane.appendChild(toRow);
+  $('#estResult').innerHTML = `
+    <div class="card result-card">
+      <div class="label">Estimated ${SVC_META[activeService].label.toLowerCase()} bill</div>
+      <div class="total"><span class="tk">৳</span> ${fmt(res.total)}</div>
+      <div class="sub">${esc(res.sub)}</div>
+    </div>
+    <div class="card">
+      <h2>Breakdown</h2>
+      <ul class="breakdown">
+        ${rows}
+        <li class="total-row"><span class="bd-key">Total payable</span><span class="bd-val">৳ ${fmt(res.total)}</span></li>
+      </ul>
+      <button class="btn secondary" id="saveFromEst" type="button" style="margin-top:14px">＋ Save to My Bills</button>
+    </div>`;
 
-    // hint (e.g. currency timestamp)
-    if (cat === 'currency') {
-      const ts = state.rates ? new Date(state.rates.fetchedAt).toLocaleString() : 'offline (static)';
-      const refresh = el('button', { class: 'swap-btn', type: 'button' }, ['↻ REFRESH RATES']);
-      refresh.addEventListener('click', () => refreshRates(true));
-      const hint = el('div', { class: 'aux' }, []);
-      hint.innerHTML = `<div class="row"><span>Rates</span><span>${ts}</span></div>`;
-      pane.appendChild(hint);
-      pane.appendChild(refresh);
-    }
+  $('#saveFromEst').addEventListener('click', () => openBillModal({
+    service: activeService,
+    amount: Math.round(res.total),
+  }));
 
-    pad.appendChild(pane);
+  $('#estResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-    const compute = () => {
-      state.convInput = fromVal.value;
-      state.convFrom[cat] = fromSel.value;
-      state.convTo[cat] = toSel.value;
-      LS.set('convFrom', state.convFrom);
-      LS.set('convTo', state.convTo);
-      const v = parseFloat(fromVal.value);
-      if (Number.isNaN(v)) { toVal.value = ''; updateConvDisplay('', ''); return; }
-      const r = convertValue(v, cat, fromSel.value, toSel.value);
-      toVal.value = fmtNum(r);
-      updateConvDisplay(`${fmtNum(v)} ${fromSel.value}`, `${toVal.value} ${toSel.value}`);
+/* ---------- My Bills ---------- */
+function billStatus(b) {
+  if (b.paid) return { cls: 'paid', label: 'Paid' };
+  if (!b.due) return { cls: 'ok', label: 'No due date' };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const due = new Date(b.due + 'T00:00:00');
+  const days = Math.round((due - today) / 86400000);
+  if (days < 0) return { cls: 'due', label: `${Math.abs(days)}d overdue` };
+  if (days === 0) return { cls: 'due', label: 'Due today' };
+  if (days <= 3) return { cls: 'soon', label: `Due in ${days}d` };
+  return { cls: 'ok', label: `Due in ${days}d` };
+}
+
+function renderBills() {
+  const bills = loadBills().sort((a, b) => {
+    if (a.paid !== b.paid) return a.paid ? 1 : -1;
+    return (a.due || '9999').localeCompare(b.due || '9999');
+  });
+
+  let body;
+  if (!bills.length) {
+    body = `
+      <div class="card"><div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 10h18"/></svg>
+        <p>No bills saved yet.<br/>Add one to track due dates and totals.</p>
+      </div></div>`;
+  } else {
+    const items = bills.map((b) => {
+      const st = billStatus(b);
+      const m = SVC_META[b.service] || SVC_META.electricity;
+      return `
+        <div class="bill" data-id="${b.id}">
+          <span class="bill-ic" style="background:${m.color}">${svcIcon(b.service, 20)}</span>
+          <span class="bill-main">
+            <span class="b-name">${esc(b.name || m.label)}</span>
+            <span class="b-meta">${esc(m.label)}${b.acct ? ' · ' + esc(b.acct) : ''}</span>
+          </span>
+          <span class="bill-amt">
+            <span class="b-tk">৳ ${fmt0(b.amount || 0)}</span><br/>
+            <span class="pill ${st.cls}">${st.label}</span>
+          </span>
+        </div>`;
+    }).join('');
+
+    const dueTotal = bills.filter((b) => !b.paid).reduce((s, b) => s + (b.amount || 0), 0);
+    body = `
+      <div class="card result-card">
+        <div class="label">Outstanding total</div>
+        <div class="total"><span class="tk">৳</span> ${fmt0(dueTotal)}</div>
+        <div class="sub">${bills.filter((b) => !b.paid).length} unpaid · ${bills.length} tracked</div>
+      </div>
+      <div class="card" style="padding:0">${items}</div>`;
+  }
+
+  screen.innerHTML = `
+    <section class="view">
+      <div class="view-head">
+        <h1>My bills</h1>
+        <p>Track utility accounts, amounts and due dates. Saved on this device only.</p>
+      </div>
+      ${body}
+      <button class="btn" id="addBill" type="button">＋ Add a bill</button>
+    </section>`;
+
+  $('#addBill').addEventListener('click', () => openBillModal());
+  screen.querySelectorAll('.bill').forEach((el) =>
+    el.addEventListener('click', () => openBillModal(loadBills().find((b) => b.id === el.dataset.id))));
+}
+
+function openBillModal(prefill) {
+  const editing = prefill && prefill.id;
+  const b = prefill || {};
+  const back = document.createElement('div');
+  back.className = 'modal-back';
+  back.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2>${editing ? 'Edit bill' : 'Add bill'}</h2>
+        <button type="button" id="mClose" aria-label="Close">✕</button>
+      </div>
+      <div class="field">
+        <label for="m-svc">Service</label>
+        <select class="input" id="m-svc">
+          <option value="electricity">Electricity</option>
+          <option value="water">Water (WASA)</option>
+          <option value="gas">Gas (Titas)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="m-name">Label <span class="hint">(optional)</span></label>
+        <input class="input" id="m-name" type="text" placeholder="e.g. Home · DPDC" value="${esc(b.name || '')}" />
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="m-amount">Amount <span class="hint">(৳)</span></label>
+          <input class="input" id="m-amount" type="number" inputmode="decimal" min="0" placeholder="0" value="${b.amount != null ? b.amount : ''}" />
+        </div>
+        <div class="field">
+          <label for="m-due">Due date</label>
+          <input class="input" id="m-due" type="date" value="${esc(b.due || '')}" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="m-acct">Account / meter no. <span class="hint">(optional)</span></label>
+        <input class="input" id="m-acct" type="text" placeholder="e.g. 1234567" value="${esc(b.acct || '')}" />
+      </div>
+      <label class="check" style="margin-bottom:16px"><input type="checkbox" id="m-paid" ${b.paid ? 'checked' : ''}/> Mark as paid</label>
+      <button class="btn" id="mSave" type="button">${editing ? 'Save changes' : 'Add bill'}</button>
+      ${editing ? '<button class="btn secondary" id="mDelete" type="button" style="margin-top:10px">Delete</button>' : ''}
+    </div>`;
+
+  document.body.appendChild(back);
+  if (b.service) $('#m-svc', back).value = b.service;
+
+  const close = () => back.remove();
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+  $('#mClose', back).addEventListener('click', close);
+
+  $('#mSave', back).addEventListener('click', () => {
+    const bills = loadBills();
+    const rec = {
+      id: editing ? b.id : 'b' + Date.now().toString(36),
+      service: $('#m-svc', back).value,
+      name: $('#m-name', back).value.trim(),
+      amount: parseFloat($('#m-amount', back).value) || 0,
+      due: $('#m-due', back).value,
+      acct: $('#m-acct', back).value.trim(),
+      paid: $('#m-paid', back).checked,
     };
-    fromVal.addEventListener('input', compute);
-    fromSel.addEventListener('change', compute);
-    toSel.addEventListener('change', compute);
-    swap.addEventListener('click', () => {
-      const a = fromSel.value, b = toSel.value;
-      fromSel.value = b; toSel.value = a;
-      compute();
-    });
-    compute();
-  }
-
-  function updateConvDisplay(expr, result) {
-    $('#expr').textContent = expr || ' ';
-    $('#result').textContent = result || '0';
-  }
-
-  function renderProgrammer() {
-    const pad = $('#pad');
-    pad.innerHTML = '';
-    pad.className = 'pad';
-
-    const allowed = PROG.BASE_CHARS[state.progBase];
-
-    // base selector
-    const basebar = el('div', { class: 'basebar' });
-    [['HEX',16],['DEC',10],['OCT',8],['BIN',2]].forEach(([label, b]) => {
-      const btn = el('button', { class: 'key tiny toggle ' + (b === state.progBase ? 'on' : ''), type: 'button' }, [label]);
-      btn.addEventListener('click', () => progPress({ type: 'pbase', v: b }));
-      basebar.appendChild(btn);
-    });
-    pad.appendChild(basebar);
-
-    // bases readout
-    const cur = PROG.parse(progBuf, state.progBase) ?? 0;
-    const bases = el('div', { class: 'bases' });
-    [['HEX',16],['DEC',10],['OCT',8],['BIN',2]].forEach(([label, b]) => {
-      const row = el('div', { class: 'b' + (b === state.progBase ? ' active' : '') }, [
-        el('span', { class: 'lbl' }, [label]),
-        el('span', { class: 'val' }, [PROG.fmt(cur, b)]),
-      ]);
-      bases.appendChild(row);
-    });
-    pad.appendChild(bases);
-
-    const rows = [
-      [['AC','pclear','danger',''],['⌫','pback','fn',''],['NOT','pnot','op',''],['MOD','pop','op','%']],
-      [['AND','pop','op','AND'],['OR','pop','op','OR'],['XOR','pop','op','XOR'],['<<','pop','op','<<']],
-      [['A','pdigit','fn','A'],['B','pdigit','fn','B'],['C','pdigit','fn','C'],['>>','pop','op','>>']],
-      [['D','pdigit','fn','D'],['E','pdigit','fn','E'],['F','pdigit','fn','F'],['÷','pop','op','/']],
-      [['7','pdigit','','7'],['8','pdigit','','8'],['9','pdigit','','9'],['×','pop','op','*']],
-      [['4','pdigit','','4'],['5','pdigit','','5'],['6','pdigit','','6'],['−','pop','op','-']],
-      [['1','pdigit','','1'],['2','pdigit','','2'],['3','pdigit','','3'],['+','pop','op','+']],
-      [['±','pneg','fn',''],['0','pdigit','','0'],['=','pequals','eq',''],['','noop','disabled','']],
-    ];
-
-    rows.forEach((row) => {
-      const rowEl = el('div', { class: 'row cols-4' });
-      row.forEach(([label, type, klass, value]) => {
-        const isDigitDisabled = type === 'pdigit' && !allowed.includes(value);
-        const btn = el('button', { class: 'key ' + (klass || '') + (isDigitDisabled ? ' disabled' : ''), type: 'button' }, [label]);
-        btn.addEventListener('click', () => progPress({ type, v: value || label }));
-        rowEl.appendChild(btn);
-      });
-      pad.appendChild(rowEl);
-    });
-  }
-
-  // ============================================================
-  // DISPLAY REFRESH
-  // ============================================================
-  function refreshDisplay() {
-    if (state.mode === 'std' || state.mode === 'sci') {
-      $('#expr').textContent = state.expr || ' ';
-      if (state.justEvaluated) {
-        $('#result').textContent = state.result;
-      } else if (!state.expr) {
-        $('#result').textContent = '0';
-      } else {
-        try {
-          const v = evaluate(state.expr);
-          $('#result').textContent = v == null ? state.expr : fmtNum(v);
-        } catch {
-          $('#result').textContent = state.expr;
-        }
-      }
-      $('#result').classList.remove('is-error');
-      $('#aux').innerHTML = '';
-    } else if (state.mode === 'prog') {
-      const exprStr = (progAcc != null ? PROG.fmt(progAcc, state.progBase) + (progOp ? ' ' + progOp : '') : '') + (progBuf ? ' ' + progBuf : '');
-      $('#expr').textContent = exprStr.trim() || ' ';
-      const cur = PROG.parse(progBuf, state.progBase) ?? 0;
-      $('#result').textContent = PROG.fmt(cur, state.progBase);
-      $('#aux').innerHTML = '';
+    if (editing) {
+      const i = bills.findIndex((x) => x.id === b.id);
+      bills[i] = rec;
+    } else {
+      bills.push(rec);
     }
-    refreshStatus();
-  }
+    saveBills(bills);
+    close();
+    toast(editing ? 'Bill updated' : 'Bill added');
+    navigate('bills');
+  });
 
-  function refreshStatus() {
-    const angleChip = $('#angleChip');
-    const baseChip = $('#baseChip');
-    const memChip = $('#memChip');
-    const rateChip = $('#rateChip');
-
-    angleChip.hidden = state.mode !== 'sci';
-    angleChip.textContent = state.angle;
-
-    baseChip.hidden = state.mode !== 'prog';
-    baseChip.textContent = ({2:'BIN',8:'OCT',10:'DEC',16:'HEX'})[state.progBase];
-
-    memChip.hidden = !state.memory;
-    memChip.textContent = 'M ' + fmtNum(state.memory);
-
-    rateChip.hidden = !(state.mode === 'conv' && state.convCat === 'currency');
-    rateChip.textContent = state.rates ? '↻ ' + new Date(state.rates.fetchedAt).toLocaleDateString() : 'static';
-  }
-
-  function flashDisplay() {
-    const d = $('#display');
-    d.classList.remove('flash');
-    void d.offsetWidth;
-    d.classList.add('flash');
-  }
-  function showError() {
-    const r = $('#result');
-    r.textContent = 'ERR';
-    r.classList.add('is-error', 'glitch');
-    $('#errChip').hidden = false;
-    setTimeout(() => { r.classList.remove('glitch'); $('#errChip').hidden = true; }, 700);
-  }
-
-  // ============================================================
-  // MODE SWITCHING
-  // ============================================================
-  function setMode(m) {
-    state.mode = m;
-    LS.set('mode', m);
-    document.querySelectorAll('.mode-tab').forEach((t) => {
-      t.classList.toggle('is-active', t.dataset.mode === m);
-    });
-    renderPad();
-    refreshDisplay();
-    if (m === 'conv' && state.convCat === 'currency') refreshRates();
-  }
-
-  // ============================================================
-  // KEYBOARD
-  // ============================================================
-  function bindKeyboard() {
-    window.addEventListener('keydown', (e) => {
-      if (state.mode === 'conv') return;
-      if (state.mode === 'prog') {
-        const k = e.key.toUpperCase();
-        if (/^[0-9A-F]$/.test(k)) { e.preventDefault(); progPress({ type: 'pdigit', v: k }); return; }
-        if (k === 'ENTER' || k === '=') { e.preventDefault(); progPress({ type: 'pequals' }); return; }
-        if (k === 'BACKSPACE') { e.preventDefault(); progPress({ type: 'pback' }); return; }
-        if (k === 'ESCAPE') { e.preventDefault(); progPress({ type: 'pclear' }); return; }
-        if (['+','-','*','/'].includes(e.key)) { e.preventDefault(); progPress({ type: 'pop', v: e.key }); return; }
-        return;
-      }
-      const k = e.key;
-      if (/^[0-9]$/.test(k)) { press({ type: 'digit', v: k }); e.preventDefault(); return; }
-      if (k === '.') { press({ type: 'dot' }); e.preventDefault(); return; }
-      if (['+','-','*','/','^','%'].includes(k)) { press({ type: 'op', v: k }); e.preventDefault(); return; }
-      if (k === '(') { press({ type: 'open' }); e.preventDefault(); return; }
-      if (k === ')') { press({ type: 'close' }); e.preventDefault(); return; }
-      if (k === 'Enter' || k === '=') { press({ type: 'equals' }); e.preventDefault(); return; }
-      if (k === 'Backspace') { press({ type: 'back' }); e.preventDefault(); return; }
-      if (k === 'Escape') { press({ type: 'clear' }); e.preventDefault(); return; }
+  if (editing) {
+    $('#mDelete', back).addEventListener('click', () => {
+      saveBills(loadBills().filter((x) => x.id !== b.id));
+      close();
+      toast('Bill deleted');
+      navigate('bills');
     });
   }
+}
 
-  // ============================================================
-  // INIT
-  // ============================================================
-  function init() {
-    applyCachedRates();
-    // tabs
-    document.querySelectorAll('.mode-tab').forEach((t) => {
-      t.addEventListener('click', () => setMode(t.dataset.mode));
-    });
-    // history toggle
-    $('#historyBtn').addEventListener('click', () => {
-      $('#history').classList.toggle('is-open');
-    });
-    $('#clearHistory').addEventListener('click', () => {
-      state.history = []; LS.set('history', []); renderHistory();
-    });
-    // status chip click → toggle angle in sci
-    $('#angleChip').addEventListener('click', () => {
-      if (state.mode === 'sci') press({ type: 'angle' });
-    });
-    // outside click closes history
-    document.addEventListener('click', (e) => {
-      const h = $('#history');
-      if (!h.classList.contains('is-open')) return;
-      if (h.contains(e.target) || $('#historyBtn').contains(e.target)) return;
-      h.classList.remove('is-open');
-    });
+/* ---------- Directory ---------- */
+function renderDirectory() {
+  const groups = DIRECTORY.map((g) => `
+    <div class="dir-group">
+      <h2>${esc(g.group)}</h2>
+      <div class="card" style="padding:0">
+        ${g.items.map((c) => `
+          <a class="contact" href="tel:${esc(c.num)}">
+            <span class="contact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg></span>
+            <span class="contact-main"><span class="c-name">${esc(c.name)}</span><span class="c-desc">${esc(c.desc)}</span></span>
+            <span class="contact-num">${esc(c.num)}</span>
+          </a>`).join('')}
+      </div>
+    </div>`).join('');
 
-    setMode(state.mode);
-    renderHistory();
-    bindKeyboard();
+  screen.innerHTML = `
+    <section class="view">
+      <div class="view-head">
+        <h1>Directory</h1>
+        <p>Tap a number to call. Utility hotlines and emergency services for Dhaka.</p>
+      </div>
+      ${groups}
+      <p class="note">Short codes (999, 333, 16xxx) are reachable from any mobile or landline in Bangladesh. Save Titas <strong>16496</strong> for gas-leak emergencies.</p>
+    </section>`;
+}
 
-    // try refresh currency in background after a beat
-    if (navigator.onLine) setTimeout(() => refreshRates(false), 1500);
-  }
+/* ---------- Tips ---------- */
+function renderTips() {
+  const items = TIPS.map((t) => `
+    <div class="tip">
+      <span class="tip-ic">${t.ic}</span>
+      <span class="tip-body"><strong>${esc(t.t)}</strong><span>${esc(t.d)}</span></span>
+    </div>`).join('');
+  screen.innerHTML = `
+    <section class="view">
+      <div class="view-head">
+        <h1>Saving tips</h1>
+        <p>Small habits that lower your electricity, water and gas bills.</p>
+      </div>
+      <div class="card" style="padding:0">${items}</div>
+    </section>`;
+}
 
-  document.addEventListener('DOMContentLoaded', init);
-})();
+/* ============================================================
+   Router / tabs
+   ============================================================ */
+const VIEWS = { estimate: renderEstimate, bills: renderBills, directory: renderDirectory, tips: renderTips };
+
+function setActiveTab(view) {
+  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === view));
+}
+function navigate(view) {
+  (VIEWS[view] || renderEstimate)();
+  setActiveTab(view);
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.tab').forEach((t) =>
+  t.addEventListener('click', () => navigate(t.dataset.view)));
+
+/* ---------- Install prompt ---------- */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('#installBtn').hidden = false;
+});
+$('#installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  $('#installBtn').hidden = true;
+});
+
+/* ---------- Boot ---------- */
+navigate('estimate');
