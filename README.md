@@ -30,24 +30,9 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-Service worker (offline) and "Install / Add to Home Screen" work on
-`localhost` and any HTTPS host.
-
-## Deploy (GitHub Pages)
-
-A workflow at `.github/workflows/deploy-pages.yml` deploys this site to
-GitHub Pages automatically on every push.
-
-**One-time setup:** in the repo, go to **Settings → Pages → Build and
-deployment → Source** and select **GitHub Actions**. (GitHub does not allow
-the workflow to enable Pages by itself.)
-
-After that, the app is live at:
-
-> **https://minhazulabedin.github.io/Claude/**
-
-Any other static host (Netlify, Vercel, Cloudflare Pages) also works — point
-it at this repo/branch with no build command.
+Or just open `index.html` directly in a browser. The service worker (offline)
+and "Install / Add to Home Screen" activate when served over `localhost` or
+any HTTPS host.
 
 ## Files
 
