@@ -85,6 +85,56 @@ const TIPS = [
   { ic: '🧾', t: 'Read your own meter', d: 'Note the meter reading monthly. If the bill jumps without higher usage, raise it with the distributor early.' },
 ];
 
+/* ---------- Service-zone centers (schematic positions) ----------
+   x, y are normalised 0..1 positions on an abstract map of Dhaka
+   (x: west→east, y: north→south). Positions are approximate and only
+   meant to show which office is *nearest* — not a survey-grade map. */
+const ZONES = {
+  electricity: {
+    label: 'Electricity',
+    centers: [
+      { n: 'DESCO — Uttara',     a: 'Uttara · Airport',        p: '16120', x: 0.56, y: 0.06 },
+      { n: 'DESCO — Mirpur',     a: 'Mirpur · Pallabi',        p: '16120', x: 0.30, y: 0.26 },
+      { n: 'DESCO — Gulshan',    a: 'Gulshan · Banani',        p: '16120', x: 0.63, y: 0.31 },
+      { n: 'DPDC — Tejgaon',     a: 'Tejgaon · Mohakhali',     p: '16116', x: 0.50, y: 0.42 },
+      { n: 'DPDC — Dhanmondi',   a: 'Dhanmondi · Mohammadpur', p: '16116', x: 0.34, y: 0.47 },
+      { n: 'DPDC — Banasree',    a: 'Badda · Rampura',         p: '16116', x: 0.72, y: 0.45 },
+      { n: 'DPDC — Motijheel',   a: 'Motijheel · Ramna',       p: '16116', x: 0.50, y: 0.62 },
+      { n: 'DPDC — Postagola',   a: 'Old Dhaka · Jatrabari',   p: '16116', x: 0.45, y: 0.74 },
+    ],
+  },
+  water: {
+    label: 'Water (WASA)',
+    centers: [
+      { n: 'WASA MODS — Uttara',   a: 'Uttara · Tongi',          p: '16162', x: 0.56, y: 0.07 },
+      { n: 'WASA MODS — Mirpur',   a: 'Mirpur · Pallabi',        p: '16162', x: 0.31, y: 0.27 },
+      { n: 'WASA MODS — Gulshan',  a: 'Gulshan · Badda',         p: '16162', x: 0.66, y: 0.34 },
+      { n: 'WASA MODS — Tejgaon',  a: 'Tejgaon · Mohakhali',     p: '16162', x: 0.50, y: 0.43 },
+      { n: 'WASA MODS — Dhanmondi',a: 'Dhanmondi · Mohammadpur', p: '16162', x: 0.33, y: 0.48 },
+      { n: 'WASA MODS — Motijheel',a: 'Motijheel · Ramna',       p: '16162', x: 0.50, y: 0.62 },
+      { n: 'WASA MODS — Old Dhaka',a: 'Lalbagh · Wari',          p: '16162', x: 0.43, y: 0.72 },
+    ],
+  },
+  gas: {
+    label: 'Gas (Titas)',
+    centers: [
+      { n: 'Titas — Uttara',      a: 'Uttara · Airport',        p: '16496', x: 0.55, y: 0.07 },
+      { n: 'Titas — Mirpur',      a: 'Mirpur · Pallabi',        p: '16496', x: 0.31, y: 0.27 },
+      { n: 'Titas — Gulshan',     a: 'Gulshan · Banani',        p: '16496', x: 0.64, y: 0.32 },
+      { n: 'Titas — Tejgaon',     a: 'Tejgaon · Farmgate',      p: '16496', x: 0.50, y: 0.43 },
+      { n: 'Titas — Mohammadpur', a: 'Mohammadpur · Dhanmondi', p: '16496', x: 0.28, y: 0.45 },
+      { n: 'Titas — Postagola',   a: 'Old Dhaka · Jatrabari',   p: '16496', x: 0.46, y: 0.72 },
+    ],
+  },
+};
+
+// Soft, distinguishable cell colours (light / dark variants).
+const CELL_COLORS = [
+  ['#dff0e4', '#1c3a28'], ['#dfeaf6', '#1b2f44'], ['#f6e6df', '#3a281c'],
+  ['#efe2f6', '#2e1c3a'], ['#f6f1da', '#3a341a'], ['#daf2f0', '#173a36'],
+  ['#f6dfe6', '#3a1c26'], ['#e4e9da', '#28301a'],
+];
+
 /* ---------- Helpers ---------- */
 const $ = (sel, el = document) => el.querySelector(sel);
 const screen = $('#screen');
@@ -548,10 +598,195 @@ function renderTips() {
     </section>`;
 }
 
+/* ---------- Zones (Voronoi service-area map) ---------- */
+let zoneService = 'electricity';
+let zoneSel = null;       // selected center index
+let zoneTap = null;       // {x,y} tap point in normalised 0..1 coords
+
+function isDark() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function renderZones() {
+  const svc = (key) => `
+    <button class="svc ${key === zoneService ? 'is-active' : ''}" data-zsvc="${key}" type="button">
+      ${svcIcon(key, 26)}<span>${SVC_META[key].label}</span>
+    </button>`;
+
+  const centers = ZONES[zoneService].centers;
+  const legend = centers.map((c, i) => {
+    const dark = isDark();
+    const col = CELL_COLORS[i % CELL_COLORS.length][dark ? 1 : 0];
+    return `
+      <li data-zi="${i}" class="${i === zoneSel ? 'is-sel' : ''}">
+        <span class="swatch" style="background:${col}"></span>
+        <span class="l-name">${esc(c.n)} <span class="l-area">· ${esc(c.a)}</span></span>
+        <a href="tel:${esc(c.p)}" class="contact-num" onclick="event.stopPropagation()">${esc(c.p)}</a>
+      </li>`;
+  }).join('');
+
+  screen.innerHTML = `
+    <section class="view">
+      <div class="view-head">
+        <h1>Service zones</h1>
+        <p>Tap the map to find the utility office covering that area — each colour is one office's catchment.</p>
+      </div>
+      <div class="svc-grid">${svc('electricity')}${svc('water')}${svc('gas')}</div>
+      <div class="card map-wrap">
+        <canvas class="map-canvas" id="voronoi"></canvas>
+        <p class="map-hint">Schematic map of Dhaka (north at top). Tap anywhere to locate your nearest center.</p>
+      </div>
+      <div class="card" id="nearestCard"></div>
+      <div class="card" style="padding:6px 12px"><ul class="legend">${legend}</ul></div>
+      <p class="note"><strong>Note:</strong> office positions are approximate and the boundaries show the <em>nearest</em> center only — actual administrative service areas may differ. Always confirm with the hotline.</p>
+    </section>`;
+
+  // service chooser
+  screen.querySelectorAll('.svc').forEach((b) =>
+    b.addEventListener('click', () => { zoneService = b.dataset.zsvc; zoneSel = null; zoneTap = null; renderZones(); }));
+
+  // legend selection
+  screen.querySelectorAll('.legend li').forEach((li) =>
+    li.addEventListener('click', () => { zoneSel = +li.dataset.zi; zoneTap = null; drawVoronoi(); updateNearest(); }));
+
+  const canvas = $('#voronoi');
+  canvas.addEventListener('click', (e) => {
+    const r = canvas.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width;
+    const ny = (e.clientY - r.top) / r.height;
+    zoneTap = { x: nx, y: ny };
+    zoneSel = nearestCenter(nx, ny);
+    drawVoronoi();
+    updateNearest();
+  });
+
+  requestAnimationFrame(() => { drawVoronoi(); updateNearest(); });
+}
+
+function nearestCenter(nx, ny) {
+  const centers = ZONES[zoneService].centers;
+  let best = 0, bd = Infinity;
+  centers.forEach((c, i) => {
+    const d = (c.x - nx) ** 2 + (c.y - ny) ** 2;
+    if (d < bd) { bd = d; best = i; }
+  });
+  return best;
+}
+
+function drawVoronoi() {
+  const canvas = $('#voronoi');
+  if (!canvas) return;
+  const centers = ZONES[zoneService].centers;
+  const dark = isDark();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cssW = canvas.clientWidth || 320;
+  const cssH = Math.round(cssW * 1.12);
+  canvas.style.height = cssH + 'px';
+  const W = Math.round(cssW * dpr), H = Math.round(cssH * dpr);
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // site positions in device pixels
+  const sx = centers.map((c) => c.x * W);
+  const sy = centers.map((c) => c.y * H);
+
+  // per-pixel nearest-site → owner grid
+  const img = ctx.createImageData(W, H);
+  const data = img.data;
+  const owner = new Int16Array(W * H);
+  const pal = centers.map((_, i) => {
+    const hex = CELL_COLORS[i % CELL_COLORS.length][dark ? 1 : 0];
+    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  });
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      let best = 0, bd = Infinity;
+      for (let i = 0; i < centers.length; i++) {
+        const d = (sx[i] - x) ** 2 + (sy[i] - y) ** 2;
+        if (d < bd) { bd = d; best = i; }
+      }
+      const idx = y * W + x;
+      owner[idx] = best;
+      let c = pal[best];
+      if (zoneSel === best) c = c.map((v) => dark ? Math.min(255, v + 26) : Math.max(0, v - 16));
+      const o = idx * 4;
+      data[o] = c[0]; data[o + 1] = c[1]; data[o + 2] = c[2]; data[o + 3] = 255;
+    }
+  }
+  // edges: darken pixels where owner differs from neighbour
+  const edge = dark ? [255, 255, 255] : [20, 50, 35];
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const idx = y * W + x;
+      const here = owner[idx];
+      if ((x > 0 && owner[idx - 1] !== here) || (y > 0 && owner[idx - W] !== here)) {
+        const o = idx * 4;
+        data[o] = edge[0]; data[o + 1] = edge[1]; data[o + 2] = edge[2]; data[o + 3] = 255;
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // site markers + labels
+  ctx.textAlign = 'center';
+  ctx.font = `${11 * dpr}px 'Plus Jakarta Sans', sans-serif`;
+  centers.forEach((c, i) => {
+    const x = sx[i], y = sy[i];
+    const sel = zoneSel === i;
+    ctx.beginPath();
+    ctx.arc(x, y, (sel ? 7 : 5) * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = SVC_META[zoneService].color;
+    ctx.strokeStyle = dark ? '#0a0f0c' : '#fff';
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.fill(); ctx.stroke();
+  });
+
+  // tap marker (a ring at the tapped point)
+  if (zoneTap) {
+    const x = zoneTap.x * W, y = zoneTap.y * H;
+    ctx.beginPath();
+    ctx.arc(x, y, 6 * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = dark ? '#fff' : '#11201a';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 11 * dpr, 0, Math.PI * 2);
+    ctx.strokeStyle = dark ? '#fff' : '#11201a';
+    ctx.lineWidth = 2 * dpr;
+    ctx.stroke();
+  }
+}
+
+function updateNearest() {
+  const card = $('#nearestCard');
+  if (!card) return;
+  if (zoneSel == null) {
+    card.innerHTML = `<div class="empty" style="padding:14px 8px"><p>Tap the map or a zone below to see which office covers that area.</p></div>`;
+    return;
+  }
+  const c = ZONES[zoneService].centers[zoneSel];
+  const m = SVC_META[zoneService];
+  card.innerHTML = `
+    <div class="nearest">
+      <span class="nearest-ic" style="background:${m.color}">${svcIcon(zoneService, 22)}</span>
+      <span class="nearest-main">
+        <span class="n-label">${zoneTap ? 'Covers this area' : 'Selected center'}</span>
+        <span class="n-name">${esc(c.n)}</span>
+        <span class="n-area">${esc(c.a)}</span>
+      </span>
+      <a class="nearest-call" href="tel:${esc(c.p)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+        ${esc(c.p)}
+      </a>
+    </div>`;
+}
+
+// keep the map crisp on rotation / resize
+window.addEventListener('resize', () => { if ($('#voronoi')) drawVoronoi(); });
+
 /* ============================================================
    Router / tabs
    ============================================================ */
-const VIEWS = { estimate: renderEstimate, bills: renderBills, directory: renderDirectory, tips: renderTips };
+const VIEWS = { estimate: renderEstimate, bills: renderBills, zones: renderZones, directory: renderDirectory, tips: renderTips };
 
 function setActiveTab(view) {
   document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === view));
