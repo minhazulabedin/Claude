@@ -135,6 +135,92 @@ const CELL_COLORS = [
   ['#f6dfe6', '#3a1c26'], ['#e4e9da', '#28301a'],
 ];
 
+/* ---------- Nearby essentials (curated Dhaka landmarks) ----------
+   Same normalised 0..1 map as the zones. Approximate positions for the
+   "what's nearest" lookup — not survey coordinates. */
+const AMENITY_CATS = [
+  { key: 'police',   label: 'Police station',  icon: '🚓', color: '#1e63d6', phone: '999' },
+  { key: 'metro',    label: 'Metro (MRT-6)',   icon: '🚇', color: '#0b8a6a' },
+  { key: 'fuel',     label: 'Fuel / CNG',      icon: '⛽', color: '#c77700' },
+  { key: 'hospital', label: 'Hospital',        icon: '🏥', color: '#d62b3a' },
+  { key: 'fire',     label: 'Fire station',    icon: '🚒', color: '#e0552b', phone: '102' },
+];
+
+const AMENITIES = {
+  police: [
+    { n: 'Uttara West PS', a: 'Uttara', x: 0.50, y: 0.05 },
+    { n: 'Uttara East PS', a: 'Uttara', x: 0.58, y: 0.07 },
+    { n: 'Pallabi PS', a: 'Pallabi', x: 0.33, y: 0.20 },
+    { n: 'Mirpur PS', a: 'Mirpur', x: 0.29, y: 0.27 },
+    { n: 'Kafrul PS', a: 'Kafrul', x: 0.45, y: 0.25 },
+    { n: 'Gulshan PS', a: 'Gulshan', x: 0.63, y: 0.31 },
+    { n: 'Badda PS', a: 'Badda', x: 0.72, y: 0.40 },
+    { n: 'Tejgaon PS', a: 'Tejgaon', x: 0.50, y: 0.40 },
+    { n: 'Mohammadpur PS', a: 'Mohammadpur', x: 0.26, y: 0.43 },
+    { n: 'Dhanmondi PS', a: 'Dhanmondi', x: 0.36, y: 0.47 },
+    { n: 'Ramna PS', a: 'Ramna', x: 0.48, y: 0.53 },
+    { n: 'Shahbagh PS', a: 'Shahbagh', x: 0.45, y: 0.55 },
+    { n: 'Motijheel PS', a: 'Motijheel', x: 0.50, y: 0.62 },
+    { n: 'Lalbagh PS', a: 'Lalbagh', x: 0.36, y: 0.66 },
+    { n: 'Kotwali PS', a: 'Old Dhaka', x: 0.45, y: 0.70 },
+    { n: 'Wari PS', a: 'Wari', x: 0.52, y: 0.69 },
+    { n: 'Jatrabari PS', a: 'Jatrabari', x: 0.62, y: 0.74 },
+  ],
+  metro: [
+    { n: 'Uttara North', a: 'MRT-6', x: 0.52, y: 0.04 },
+    { n: 'Uttara Center', a: 'MRT-6', x: 0.51, y: 0.08 },
+    { n: 'Uttara South', a: 'MRT-6', x: 0.50, y: 0.12 },
+    { n: 'Pallabi', a: 'MRT-6', x: 0.45, y: 0.18 },
+    { n: 'Mirpur 11', a: 'MRT-6', x: 0.43, y: 0.22 },
+    { n: 'Mirpur 10', a: 'MRT-6', x: 0.42, y: 0.26 },
+    { n: 'Kazipara', a: 'MRT-6', x: 0.44, y: 0.30 },
+    { n: 'Shewrapara', a: 'MRT-6', x: 0.45, y: 0.34 },
+    { n: 'Agargaon', a: 'MRT-6', x: 0.44, y: 0.38 },
+    { n: 'Bijoy Sarani', a: 'MRT-6', x: 0.47, y: 0.41 },
+    { n: 'Farmgate', a: 'MRT-6', x: 0.47, y: 0.45 },
+    { n: 'Karwan Bazar', a: 'MRT-6', x: 0.48, y: 0.49 },
+    { n: 'Shahbagh', a: 'MRT-6', x: 0.47, y: 0.53 },
+    { n: 'Dhaka University', a: 'MRT-6', x: 0.46, y: 0.57 },
+    { n: 'Bangladesh Secretariat', a: 'MRT-6', x: 0.49, y: 0.61 },
+    { n: 'Motijheel', a: 'MRT-6', x: 0.50, y: 0.64 },
+    { n: 'Kamalapur', a: 'MRT-6', x: 0.52, y: 0.67 },
+  ],
+  fuel: [
+    { n: 'Uttara Filling Station', a: 'Uttara', x: 0.55, y: 0.10 },
+    { n: 'Mirpur CNG & Fuel', a: 'Mirpur', x: 0.32, y: 0.28 },
+    { n: 'Gulshan Filling Station', a: 'Gulshan', x: 0.62, y: 0.34 },
+    { n: 'Mohakhali Petrol Pump', a: 'Mohakhali', x: 0.52, y: 0.36 },
+    { n: 'Tejgaon Fuel Station', a: 'Tejgaon', x: 0.50, y: 0.43 },
+    { n: 'Mohammadpur CNG', a: 'Mohammadpur', x: 0.27, y: 0.45 },
+    { n: 'Dhanmondi Filling Station', a: 'Dhanmondi', x: 0.36, y: 0.49 },
+    { n: 'Motijheel Petrol Pump', a: 'Motijheel', x: 0.51, y: 0.62 },
+    { n: 'Jatrabari Fuel & CNG', a: 'Jatrabari', x: 0.60, y: 0.73 },
+  ],
+  hospital: [
+    { n: 'Kuwait-Bangladesh Friendship', a: 'Uttara', x: 0.54, y: 0.08 },
+    { n: 'National Heart Foundation', a: 'Mirpur', x: 0.36, y: 0.27 },
+    { n: 'United Hospital', a: 'Gulshan', x: 0.66, y: 0.33 },
+    { n: 'Shaheed Suhrawardy (ShSMCH)', a: 'Sher-e-Bangla Nagar', x: 0.42, y: 0.37 },
+    { n: 'Square Hospital', a: 'Panthapath', x: 0.43, y: 0.46 },
+    { n: 'Labaid Hospital', a: 'Dhanmondi', x: 0.37, y: 0.48 },
+    { n: 'BIRDEM General', a: 'Shahbagh', x: 0.46, y: 0.54 },
+    { n: 'Dhaka Medical College (DMCH)', a: 'Shahbagh', x: 0.44, y: 0.58 },
+    { n: 'Sir Salimullah (Mitford)', a: 'Old Dhaka', x: 0.43, y: 0.70 },
+  ],
+  fire: [
+    { n: 'Uttara Fire Station', a: 'Uttara', x: 0.53, y: 0.07 },
+    { n: 'Mirpur Fire Station', a: 'Mirpur', x: 0.31, y: 0.26 },
+    { n: 'Mohakhali Fire Station', a: 'Mohakhali', x: 0.53, y: 0.35 },
+    { n: 'Tejgaon Fire Station', a: 'Tejgaon', x: 0.49, y: 0.42 },
+    { n: 'Hazaribagh Fire Station', a: 'Hazaribagh', x: 0.36, y: 0.62 },
+    { n: 'Sadarghat Fire Station', a: 'Old Dhaka', x: 0.46, y: 0.73 },
+    { n: 'Postagola Fire Station', a: 'Postagola', x: 0.50, y: 0.76 },
+  ],
+};
+
+// Approximate real-world span of the schematic map, for rough distances.
+const MAP_KM = { w: 16, h: 28 };
+
 /* ---------- Helpers ---------- */
 const $ = (sel, el = document) => el.querySelector(sel);
 const screen = $('#screen');
@@ -602,6 +688,7 @@ function renderTips() {
 let zoneService = 'electricity';
 let zoneSel = null;       // selected center index
 let zoneTap = null;       // {x,y} tap point in normalised 0..1 coords
+let zoneNearby = [];      // [{cat, item, km}] nearest amenity per category
 
 function isDark() {
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -637,17 +724,18 @@ function renderZones() {
         <p class="map-hint">Schematic map of Dhaka (north at top). Tap anywhere to locate your nearest center.</p>
       </div>
       <div class="card" id="nearestCard"></div>
+      <div id="nearbyCard"></div>
       <div class="card" style="padding:6px 12px"><ul class="legend">${legend}</ul></div>
-      <p class="note"><strong>Note:</strong> office positions are approximate and the boundaries show the <em>nearest</em> center only — actual administrative service areas may differ. Always confirm with the hotline.</p>
+      <p class="note"><strong>Note:</strong> office and landmark positions are approximate, and the map shows the <em>nearest</em> point only — actual administrative service areas may differ. Always confirm with the hotline.</p>
     </section>`;
 
   // service chooser
   screen.querySelectorAll('.svc').forEach((b) =>
-    b.addEventListener('click', () => { zoneService = b.dataset.zsvc; zoneSel = null; zoneTap = null; renderZones(); }));
+    b.addEventListener('click', () => { zoneService = b.dataset.zsvc; zoneSel = null; zoneTap = null; zoneNearby = []; renderZones(); }));
 
   // legend selection
   screen.querySelectorAll('.legend li').forEach((li) =>
-    li.addEventListener('click', () => { zoneSel = +li.dataset.zi; zoneTap = null; drawVoronoi(); updateNearest(); }));
+    li.addEventListener('click', () => { zoneSel = +li.dataset.zi; zoneTap = null; zoneNearby = []; drawVoronoi(); updateNearest(); updateNearby(); }));
 
   const canvas = $('#voronoi');
   canvas.addEventListener('click', (e) => {
@@ -656,11 +744,25 @@ function renderZones() {
     const ny = (e.clientY - r.top) / r.height;
     zoneTap = { x: nx, y: ny };
     zoneSel = nearestCenter(nx, ny);
+    zoneNearby = computeNearby(nx, ny);
     drawVoronoi();
     updateNearest();
+    updateNearby();
   });
 
-  requestAnimationFrame(() => { drawVoronoi(); updateNearest(); });
+  requestAnimationFrame(() => { drawVoronoi(); updateNearest(); updateNearby(); });
+}
+
+function computeNearby(nx, ny) {
+  return AMENITY_CATS.map((cat) => {
+    let best = null, bd = Infinity;
+    for (const item of AMENITIES[cat.key]) {
+      const d = (item.x - nx) ** 2 + (item.y - ny) ** 2;
+      if (d < bd) { bd = d; best = item; }
+    }
+    const dx = (best.x - nx) * MAP_KM.w, dy = (best.y - ny) * MAP_KM.h;
+    return { cat, item: best, km: Math.sqrt(dx * dx + dy * dy) };
+  });
 }
 
 function nearestCenter(nx, ny) {
@@ -741,6 +843,30 @@ function drawVoronoi() {
     ctx.fill(); ctx.stroke();
   });
 
+  // nearest amenity markers + connector lines from the tapped point
+  if (zoneTap && zoneNearby.length) {
+    const tx = zoneTap.x * W, ty = zoneTap.y * H;
+    zoneNearby.forEach(({ cat, item }) => {
+      const x = item.x * W, y = item.y * H;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty); ctx.lineTo(x, y);
+      ctx.strokeStyle = cat.color + (dark ? '88' : '66');
+      ctx.lineWidth = 1.5 * dpr;
+      ctx.setLineDash([4 * dpr, 4 * dpr]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+    zoneNearby.forEach(({ cat, item }) => {
+      const x = item.x * W, y = item.y * H;
+      ctx.beginPath();
+      ctx.arc(x, y, 5 * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = cat.color;
+      ctx.strokeStyle = dark ? '#0a0f0c' : '#fff';
+      ctx.lineWidth = 2 * dpr;
+      ctx.fill(); ctx.stroke();
+    });
+  }
+
   // tap marker (a ring at the tapped point)
   if (zoneTap) {
     const x = zoneTap.x * W, y = zoneTap.y * H;
@@ -777,6 +903,35 @@ function updateNearest() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
         ${esc(c.p)}
       </a>
+    </div>`;
+}
+
+function updateNearby() {
+  const card = $('#nearbyCard');
+  if (!card) return;
+  if (!zoneNearby.length) { card.innerHTML = ''; return; }
+  const rows = zoneNearby.map(({ cat, item, km }) => {
+    const dist = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+    const call = cat.phone
+      ? `<a class="amen-call" href="tel:${esc(cat.phone)}" aria-label="Call ${esc(cat.label)}">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+         </a>`
+      : '';
+    return `
+      <div class="amen">
+        <span class="amen-ic" style="color:${cat.color}">${cat.icon}</span>
+        <span class="amen-main">
+          <span class="a-name">${esc(item.n)}</span>
+          <span class="a-meta">${esc(cat.label)} · ${esc(item.a)}</span>
+        </span>
+        <span class="amen-dist">≈ ${dist}</span>
+        ${call}
+      </div>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="card">
+      <h2>Nearby essentials</h2>
+      ${rows}
     </div>`;
 }
 

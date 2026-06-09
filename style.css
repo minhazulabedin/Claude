@@ -256,6 +256,23 @@ select.input {
 .legend .l-area { color: var(--ink-dim); font-size: 12px; font-weight: 500; }
 .legend li.is-sel { background: var(--green-soft); border-radius: 10px; }
 
+.amen { display: flex; align-items: center; gap: 12px; padding: 11px 2px; }
+.amen + .amen { border-top: 1px solid var(--line); }
+.amen-ic {
+  width: 36px; height: 36px; flex: none; border-radius: 10px; display: grid; place-items: center;
+  font-size: 18px; background: var(--surface-2);
+}
+.amen-main { flex: 1; min-width: 0; }
+.amen-main .a-name { font-weight: 700; font-size: 14px; }
+.amen-main .a-meta { font-size: 12px; color: var(--ink-dim); }
+.amen-dist { font-weight: 700; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.amen-call {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; background: linear-gradient(150deg, var(--green-2), var(--green)); box-shadow: var(--shadow);
+}
+@media (prefers-color-scheme: dark) { .amen-call { color: #06120b; } }
+.amen-call svg { width: 16px; height: 16px; }
+
 /* ---------- Tips ---------- */
 .tip { display: flex; gap: 12px; padding: 14px; }
 .tip + .tip { border-top: 1px solid var(--line); }
