@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voronoi Accessibility Analysis — Dhaka Utilities</title>
+<style>
+  :root{
+    --bg:#eef2f1; --surface:#ffffff; --surface-2:#f5f8f7; --line:#d9e2df;
+    --ink:#12211d; --ink-2:#3f524c; --muted:#71847d;
+    --accent:#0d7d6b; --accent-ink:#0a5f52;
+    --shadow:0 1px 2px rgba(16,40,34,.06),0 8px 24px rgba(16,40,34,.07);
+    /* service categorical (Okabe–Ito, CVD-safe) */
+    --s-metro:#0072B2; --s-hosp:#D55E00; --s-water:#56B4E9;
+    --s-fuel:#E69F00; --s-bus:#009E73; --s-fire:#CC79A7;
+    --good:#12876f; --warn:#E69F00; --crit:#c0391b;
+    --map-bg:#e7edeb; --map-land:#f4f7f6; --map-line:#c4d0cc;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0c1211; --surface:#141c1a; --surface-2:#101715; --line:#22302c;
+      --ink:#e7efec; --ink-2:#adbdb7; --muted:#7d908a;
+      --accent:#2bb39b; --accent-ink:#8fe9d8;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);
+      --map-bg:#0f1917; --map-land:#16211e; --map-line:#28362f;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#eef2f1; --surface:#ffffff; --surface-2:#f5f8f7; --line:#d9e2df;
+    --ink:#12211d; --ink-2:#3f524c; --muted:#71847d; --accent:#0d7d6b; --accent-ink:#0a5f52;
+    --map-bg:#e7edeb; --map-land:#f4f7f6; --map-line:#c4d0cc;
+    --shadow:0 1px 2px rgba(16,40,34,.06),0 8px 24px rgba(16,40,34,.07);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1211; --surface:#141c1a; --surface-2:#101715; --line:#22302c;
+    --ink:#e7efec; --ink-2:#adbdb7; --muted:#7d908a; --accent:#2bb39b; --accent-ink:#8fe9d8;
+    --map-bg:#0f1917; --map-land:#16211e; --map-line:#28362f;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font);
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+    padding:clamp(12px,3vw,28px);
+  }
+  .wrap{max-width:1200px;margin:0 auto}
+  header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+  .title h1{font-size:clamp(20px,3vw,28px);margin:0 0 4px;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+  .title p{margin:0;color:var(--muted);max-width:60ch;font-size:14px}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);font-weight:700;margin-bottom:6px}
+  .theme-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink-2);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;box-shadow:var(--shadow)}
+  .theme-btn:hover{border-color:var(--accent)}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .pad{padding:16px}
+  .map-card{padding:14px}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;margin-bottom:12px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field > label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .seg{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+  .seg button{border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:13px;font-weight:600;padding:7px 11px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+  .seg button .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 2px var(--surface)}
+  .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .seg.small button{padding:6px 10px;font-size:12px}
+  .slider-row{display:flex;align-items:center;gap:12px;min-width:210px}
+  input[type=range]{accent-color:var(--accent);width:150px}
+  .thresh-val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);min-width:56px;font-size:13px}
+  .chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none}
+  .chk input{accent-color:var(--accent);width:16px;height:16px}
+  .map-shell{position:relative;width:100%;border-radius:12px;overflow:hidden;background:var(--map-bg);border:1px solid var(--line)}
+  canvas{display:block;width:100%;height:auto;touch-action:none}
+  .readout{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:12px;color:var(--ink-2);pointer-events:none;backdrop-filter:blur(4px);max-width:80%;font-variant-numeric:tabular-nums;transition:opacity .15s;box-shadow:var(--shadow)}
+  .readout b{color:var(--ink)}
+  .scalebar{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;pointer-events:none}
+  .scalebar .bar{height:4px;background:var(--ink);opacity:.75;border-radius:2px}
+  .scalebar span{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:12px;align-items:center}
+  .legend .item{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2)}
+  .legend .swatch{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  .ramp{height:10px;width:120px;border-radius:5px;background:linear-gradient(90deg,#f7f7f4,#fddca6,#f6a860,#e85d2a,#a5140e)}
+  .ramp-wrap{display:flex;align-items:center;gap:8px}
+  .ramp-wrap small{font-size:11px;color:var(--muted)}
+  /* right column */
+  .side{display:flex;flex-direction:column;gap:14px}
+  .side h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .tile .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .tile .v{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:3px}
+  .tile .u{font-size:12px;color:var(--muted);font-weight:600}
+  .tile.flag .v{color:var(--crit)}
+  .tile.good .v{color:var(--good)}
+  .lst{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .lst li{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line);font-size:13px}
+  .lst li:last-child{border-bottom:0}
+  .rank{width:20px;height:20px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted);flex:0 0 auto}
+  .lst .nm{flex:1;color:var(--ink);font-weight:600}
+  .lst .mv{font-variant-numeric:tabular-nums;font-weight:700;font-size:12px}
+  .lst .co{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .bar-mini{height:5px;border-radius:3px;background:var(--line);flex:1;max-width:70px;overflow:hidden}
+  .bar-mini i{display:block;height:100%;background:var(--crit);border-radius:3px}
+  .rec li .rank{background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--warn) 18%,var(--surface));color:#8a6a00}
+  @media (prefers-color-scheme:dark){.pill{color:#f0c869}}
+  .note{font-size:12px;color:var(--muted);line-height:1.55}
+  .note b{color:var(--ink-2)}
+  footer.foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+  .foot code{font-family:var(--mono);background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:11px}
+  .layer-name{font-weight:800;color:var(--ink)}
+  .method{display:grid;gap:8px}
+  .method .step{display:flex;gap:10px;font-size:12.5px;color:var(--ink-2)}
+  .method .n{font-family:var(--mono);color:var(--accent-ink);font-weight:700;flex:0 0 auto}
+</style>
+</head>
+<body data-palette="#0072B2,#D55E00,#56B4E9,#E69F00,#009E73,#CC79A7">
+<div class="wrap">
+  <header class="top">
+    <div class="title">
+      <div class="eyebrow">Voronoi coverage study · case study: Dhaka</div>
+      <h1>Utility Accessibility Analysis of Dhaka City</h1>
+      <p>Each region is served by its nearest facility. Coloured distance and cell size reveal
+         where coverage is thin — and where a new facility would help most.</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">◐ Theme</button>
+  </header>
+
+  <div class="grid">
+    <!-- MAP -->
+    <section class="card map-card">
+      <div class="controls">
+        <div class="field">
+          <label>Utility service</label>
+          <div class="seg small" id="layerSeg" role="tablist"></div>
+        </div>
+        <div class="field">
+          <label>Map view</label>
+          <div class="seg" id="viewSeg" role="tablist">
+            <button data-view="heat" aria-pressed="true">Coverage heatmap</button>
+            <button data-view="cells" aria-pressed="false">Service regions</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Underserved beyond</label>
+          <div class="slider-row">
+            <input type="range" id="thresh" min="0.5" max="3" step="0.1" value="1.5" />
+            <span class="thresh-val" id="threshVal">1.5 km</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Overlays</label>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <label class="chk"><input type="checkbox" id="showRecs" checked /> Recommended sites</label>
+            <label class="chk"><input type="checkbox" id="showAll" /> All services (faint)</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-shell">
+        <canvas id="map" width="420" height="740"></canvas>
+        <div class="readout" id="readout">Hover the map…</div>
+        <div class="scalebar"><div class="bar" id="scaleBar" style="width:60px"></div><span id="scaleTxt">2 km</span></div>
+      </div>
+
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <!-- SIDE -->
+    <aside class="side">
+      <div class="card pad">
+        <h2>Coverage — <span class="layer-name" id="sideLayer">Metro</span></h2>
+        <div class="tiles" id="tiles"></div>
+      </div>
+
+      <div class="card pad">
+        <h2>Most underserved areas</h2>
+        <ul class="lst" id="worst"></ul>
+      </div>
+
+      <div class="card pad">
+        <h2>Recommended new sites <span class="pill" id="recCount">3</span></h2>
+        <ul class="lst rec" id="recs"></ul>
+        <p class="note" style="margin:10px 0 0">Placed by the <b>largest-empty-circle</b> rule — the point inside the
+          city farthest from every existing facility, chosen one after another.</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h2 style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700">Method</h2>
+    <div class="method">
+      <div class="step"><span class="n">1</span><span><b>Collect points.</b> Approximate lon/lat of each facility per service type across Dhaka.</span></div>
+      <div class="step"><span class="n">2</span><span><b>Tessellate.</b> Every point in the city is assigned to its nearest facility — the Voronoi partition (computed here as a fine distance raster inside the city boundary).</span></div>
+      <div class="step"><span class="n">3</span><span><b>Score accessibility.</b> Distance-to-nearest-facility (km) per location gives mean / median / worst access and the share of the city beyond the chosen threshold.</span></div>
+      <div class="step"><span class="n">4</span><span><b>Recommend.</b> Greedy farthest-point search proposes new sites where the current gap is largest.</span></div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <b>Data disclaimer.</b> Facility coordinates are <b>approximate</b>, hand-compiled for a methodological case study —
+    not an official register. Distances use an equirectangular projection about latitude 23.78°N
+    (<code>1° lat ≈ 110.6 km</code>, <code>1° lon ≈ 101.9 km</code>) and are straight-line, not road-network, distances.
+    Treat magnitudes as indicative. Built as a static page — runs fully offline.
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+// ---------- projection / geo ----------
+const W = 420, H = 740;
+const LON0 = 90.335, LON1 = 90.460, LAT0 = 23.685, LAT1 = 23.888;
+const KM_LAT = 110.574, KM_LON = 101.90;               // km per degree near Dhaka
+const dLon = LON1 - LON0, dLat = LAT1 - LAT0;
+const kmPerPxX = (dLon * KM_LON) / W;                  // ≈ isotropic by construction
+const kmPerPxY = (dLat * KM_LAT) / H;
+const lon2x = lon => (lon - LON0) / dLon * W;
+const lat2y = lat => (LAT1 - lat) / dLat * H;
+const x2lon = x => LON0 + x / W * dLon;
+const y2lat = y => LAT1 - y / H * dLat;
+
+// ---------- data ----------
+const P = (n, lon, lat) => ({ n, lon, lat, x: lon2x(lon), y: lat2y(lat), kx: lon*KM_LON, ky: lat*KM_LAT });
+const LAYERS = [
+  { id:"metro", label:"Metro (MRT-6)", color:"#0072B2", pts:[
+    P("Uttara North",90.3655,23.8690),P("Uttara Center",90.3662,23.8600),P("Uttara South",90.3672,23.8510),
+    P("Pallabi",90.3650,23.8258),P("Mirpur 11",90.3652,23.8190),P("Mirpur 10",90.3685,23.8072),
+    P("Kazipara",90.3722,23.7990),P("Shewrapara",90.3752,23.7920),P("Agargaon",90.3800,23.7780),
+    P("Bijoy Sarani",90.3835,23.7690),P("Farmgate",90.3892,23.7580),P("Karwan Bazar",90.3930,23.7510),
+    P("Shahbagh",90.3952,23.7390),P("Dhaka University",90.3972,23.7325),P("Secretariat",90.4100,23.7300),
+    P("Motijheel",90.4172,23.7268)]},
+  { id:"hosp", label:"Hospitals", color:"#D55E00", pts:[
+    P("Dhaka Medical College",90.3980,23.7258),P("BSMMU",90.3942,23.7392),P("Square Hospital",90.3842,23.7522),
+    P("United Hospital",90.4182,23.7975),P("Evercare",90.4252,23.8150),P("Ibn Sina Dhanmondi",90.3730,23.7460),
+    P("Popular Dhanmondi",90.3790,23.7510),P("Nat. Heart Foundation",90.3720,23.8080),P("Kurmitola General",90.3980,23.8470),
+    P("Mugda Medical",90.4360,23.7270),P("Holy Family",90.4040,23.7460),P("Suhrawardy",90.3752,23.7670),
+    P("Delta Medical",90.3665,23.7660),P("Salahuddin Mirpur",90.3690,23.8060),P("Anwer Khan Modern",90.3772,23.7520)]},
+  { id:"water", label:"Water (WASA)", color:"#56B4E9", pts:[
+    P("Saidabad WTP",90.4350,23.7120),P("Chandnighat WTP",90.4080,23.7070),P("WASA Bhaban",90.3920,23.7510),
+    P("Mirpur Zone",90.3650,23.8060),P("Uttara Zone",90.3790,23.8650),P("Gulshan Zone",90.4140,23.7920),
+    P("Mohammadpur Zone",90.3580,23.7650),P("Motijheel Zone",90.4200,23.7280),P("Jatrabari Zone",90.4380,23.7050),
+    P("Badda Zone",90.4250,23.7800)]},
+  { id:"fuel", label:"Fuel / CNG", color:"#E69F00", pts:[
+    P("Tejgaon Pump",90.4000,23.7590),P("Mohakhali Pump",90.4050,23.7800),P("Mirpur 1 Pump",90.3530,23.7990),
+    P("Uttara Pump",90.3800,23.8600),P("Jatrabari Pump",90.4320,23.7100),P("Dhanmondi 27",90.3730,23.7530),
+    P("Gulshan 1 Pump",90.4150,23.7800),P("Malibagh Pump",90.4150,23.7500),P("Shyamoli Pump",90.3650,23.7740),
+    P("Bashundhara Pump",90.4280,23.8180),P("Khilgaon Pump",90.4250,23.7500),P("Kamalapur Pump",90.4260,23.7330)]},
+  { id:"bus", label:"Bus stops", color:"#009E73", pts:[
+    P("Gabtoli",90.3430,23.7830),P("Mohakhali Terminal",90.4050,23.7780),P("Sayedabad Terminal",90.4320,23.7110),
+    P("Farmgate",90.3900,23.7580),P("Shahbagh",90.3950,23.7390),P("Gulistan",90.4120,23.7260),
+    P("Mirpur 10",90.3685,23.8072),P("Uttara Azampur",90.3980,23.8630),P("Jatrabari",90.4350,23.7100),
+    P("Badda",90.4260,23.7840),P("Malibagh",90.4160,23.7500),P("Notun Bazar",90.4250,23.7970),
+    P("Abdullahpur",90.3970,23.8780),P("Science Lab",90.3840,23.7390)]},
+  { id:"fire", label:"Fire stations", color:"#CC79A7", pts:[
+    P("Central (Palashi)",90.3960,23.7270),P("Mirpur",90.3680,23.8060),P("Mohammadpur",90.3590,23.7650),
+    P("Tejgaon",90.3970,23.7600),P("Uttara",90.3880,23.8650),P("Postogola",90.4280,23.7000),
+    P("Khilgaon",90.4260,23.7500),P("Gulshan",90.4170,23.7890)]},
+];
+const AREAS = [
+  ["Uttara",90.3790,23.8650],["Abdullahpur",90.3970,23.8780],["Dakshinkhan",90.4200,23.8720],
+  ["Uttarkhan",90.4050,23.8820],["Turag",90.3520,23.8560],["Mirpur",90.3660,23.8060],
+  ["Pallabi",90.3650,23.8250],["Kafrul",90.3800,23.8000],["Cantonment",90.3950,23.8250],
+  ["Mohammadpur",90.3590,23.7650],["Kamrangirchar",90.3720,23.7150],["Hazaribagh",90.3700,23.7350],
+  ["Dhanmondi",90.3760,23.7460],["Tejgaon",90.3980,23.7620],["Gulshan",90.4150,23.7920],
+  ["Banani",90.4020,23.7940],["Badda",90.4260,23.7800],["Bashundhara",90.4280,23.8100],
+  ["Rampura",90.4200,23.7600],["Khilgaon",90.4250,23.7500],["Motijheel",90.4170,23.7270],
+  ["Lalbagh / Old Dhaka",90.3880,23.7180],["Jatrabari",90.4350,23.7100],["Shyampur",90.4350,23.6980],
+].map(a=>({n:a[0],lon:a[1],lat:a[2],x:lon2x(a[1]),y:lat2y(a[2])}));
+const BOUNDARY = [
+  [90.345,23.885],[90.400,23.888],[90.430,23.878],[90.448,23.845],[90.452,23.800],
+  [90.448,23.760],[90.455,23.720],[90.448,23.695],[90.420,23.688],[90.390,23.690],
+  [90.372,23.700],[90.360,23.720],[90.352,23.745],[90.345,23.775],[90.340,23.810],[90.340,23.850],
+].map(p=>[lon2x(p[0]),lat2y(p[1])]);
+
+// ---------- boundary mask ----------
+function inPoly(px,py,poly){
+  let c=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+    if(((yi>py)!==(yj>py)) && (px<(xj-xi)*(py-yi)/(yj-yi)+xi)) c=!c;
+  }
+  return c;
+}
+const mask = new Uint8Array(W*H);
+let landCount=0;
+for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+  if(inPoly(x+0.5,y+0.5,BOUNDARY)){ mask[y*W+x]=1; landCount++; }
+}
+const boundaryIdx = [];
+for(let i=0;i<W*H;i++) if(mask[i]) boundaryIdx.push(i);
+
+// ---------- per-layer compute (raster nearest) ----------
+function computeLayer(pts){
+  const dist = new Float32Array(W*H);      // km to nearest facility
+  const owner = new Int32Array(W*H).fill(-1);
+  const cellArea = new Float64Array(pts.length);
+  const pxKmX = kmPerPxX, pxKmY = kmPerPxY;
+  for(let k=0;k<boundaryIdx.length;k++){
+    const i = boundaryIdx[k];
+    const x = i%W, y=(i/W)|0;
+    // location in km-space
+    const lon = LON0 + (x+0.5)/W*dLon, lat = LAT1 - (y+0.5)/H*dLat;
+    const kx = lon*KM_LON, ky = lat*KM_LAT;
+    let best=1e9, bi=-1;
+    for(let p=0;p<pts.length;p++){
+      const dx=kx-pts[p].kx, dy=ky-pts[p].ky;
+      const d=dx*dx+dy*dy;
+      if(d<best){best=d;bi=p;}
+    }
+    const dkm=Math.sqrt(best);
+    dist[i]=dkm; owner[i]=bi; cellArea[bi]+= (pxKmX*pxKmY);
+  }
+  // stats over land
+  let sum=0,max=0; const hist=new Float64Array(400); const HB=0.02; // 0..8km
+  for(let k=0;k<boundaryIdx.length;k++){ const d=dist[boundaryIdx[k]]; sum+=d; if(d>max)max=d; hist[Math.min(399,(d/HB)|0)]++; }
+  const n=boundaryIdx.length, mean=sum/n;
+  const pct=q=>{let c=0;for(let b=0;b<hist.length;b++){c+=hist[b];if(c>=q*n)return (b+0.5)*HB;}return max;};
+  const median=pct(0.5), p90=pct(0.9);
+  // worst-served named areas: distance of each named area to nearest facility
+  const worst = AREAS.map(a=>{
+    let best=1e9,bn="";
+    for(const p of pts){const dx=a.lon*KM_LON-p.kx,dy=a.lat*KM_LAT-p.ky;const d=dx*dx+dy*dy;if(d<best){best=d;bn=p.n;}}
+    return {name:a.n,km:Math.sqrt(best),lon:a.lon,lat:a.lat,near:bn};
+  }).sort((u,v)=>v.km-u.km);
+  return {dist,owner,cellArea,mean,median,p90,max,n};
+}
+
+// greedy farthest-point recommendations (largest empty circle, iterated)
+function recommend(pts, K){
+  const extra=[]; // {kx,ky}
+  const cur = new Float32Array(W*H);
+  // seed with current nearest distances over land
+  for(let k=0;k<boundaryIdx.length;k++){
+    const i=boundaryIdx[k]; const x=i%W,y=(i/W)|0;
+    const lon=LON0+(x+0.5)/W*dLon, lat=LAT1-(y+0.5)/H*dLat;
+    const kx=lon*KM_LON, ky=lat*KM_LAT;
+    let best=1e9; for(const p of pts){const dx=kx-p.kx,dy=ky-p.ky;const d=dx*dx+dy*dy;if(d<best)best=d;}
+    cur[i]=best; // squared km
+  }
+  const recs=[];
+  for(let r=0;r<K;r++){
+    let bi=-1,bv=-1;
+    for(let k=0;k<boundaryIdx.length;k++){const i=boundaryIdx[k];if(cur[i]>bv){bv=cur[i];bi=i;}}
+    if(bi<0)break;
+    const x=bi%W,y=(bi/W)|0;
+    const lon=LON0+(x+0.5)/W*dLon, lat=LAT1-(y+0.5)/H*dLat;
+    const kx=lon*KM_LON, ky=lat*KM_LAT;
+    // nearest named area
+    let an="",ad=1e9; for(const a of AREAS){const dx=a.lon-lon,dy=a.lat-lat;const d=dx*dx+dy*dy;if(d<ad){ad=d;an=a.n;}}
+    recs.push({x,y,lon,lat,gap:Math.sqrt(bv),area:an});
+    // update field with new site
+    for(let k=0;k<boundaryIdx.length;k++){const i=boundaryIdx[k];const xx=i%W,yy=(i/W)|0;
+      const lo=LON0+(xx+0.5)/W*dLon, la=LAT1-(yy+0.5)/H*dLat; const dx=lo*KM_LON-kx,dy=la*KM_LAT-ky;
+      const d=dx*dx+dy*dy; if(d<cur[i])cur[i]=d;}
+  }
+  return recs;
+}
+
+// ---------- precompute all layers for report + interaction ----------
+const CACHE = {};
+const ANALYSIS = {};
+LAYERS.forEach(L=>{
+  const c = computeLayer(L.pts);
+  const worst = AREAS.map(a=>{
+    let best=1e9,bn=""; for(const p of L.pts){const dx=a.lon*KM_LON-p.kx,dy=a.lat*KM_LAT-p.ky;const d=dx*dx+dy*dy;if(d<best){best=d;bn=p.n;}}
+    return {name:a.n,km:+Math.sqrt(best).toFixed(2),near:bn,lon:a.lon,lat:a.lat};
+  }).sort((u,v)=>v.km-u.km);
+  const recs = recommend(L.pts,5).map(r=>({area:r.area,lon:+r.lon.toFixed(4),lat:+r.lat.toFixed(4),gapKm:+r.gap.toFixed(2),x:r.x,y:r.y}));
+  CACHE[L.id]={comp:c,worst,recs};
+  // %underserved at 1.5km baseline
+  let u=0; for(let k=0;k<boundaryIdx.length;k++) if(c.dist[boundaryIdx[k]]>1.5)u++;
+  ANALYSIS[L.id]={
+    label:L.label, facilities:L.pts.length,
+    meanKm:+c.mean.toFixed(2), medianKm:+c.median.toFixed(2), worstKm:+c.max.toFixed(2), p90Km:+c.p90.toFixed(2),
+    pctUnderserved_1_5km:+(100*u/c.n).toFixed(1),
+    cityAreaKm2:+(landCount*kmPerPxX*kmPerPxY).toFixed(1),
+    worstAreas:worst.slice(0,5), recommendations:recs.slice(0,3),
+  };
+});
+window.ANALYSIS = ANALYSIS;
+window.DATA = { layers: LAYERS.map(l=>({id:l.id,label:l.label,pts:l.pts.map(p=>({n:p.n,lon:p.lon,lat:p.lat}))})), areas: AREAS.map(a=>({n:a.n,lon:a.lon,lat:a.lat})) };
+window.setLayer = id => selectLayer(id);   // for headless capture
+window.setView  = v => selectView(v);
+
+// ---------- rendering ----------
+const cv = document.getElementById("map"), ctx = cv.getContext("2d");
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// sequential YlOrRd ramp
+const RAMP = [[247,247,244],[253,220,166],[246,168,96],[232,93,42],[165,20,14]];
+function rampColor(t){
+  t=Math.max(0,Math.min(1,t)); const s=t*(RAMP.length-1); const i=Math.floor(s), f=s-i;
+  const a=RAMP[i], b=RAMP[Math.min(RAMP.length-1,i+1)];
+  return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f];
+}
+let state={layer:"metro",view:"heat",thresh:1.5,showRecs:true,showAll:false};
+const HEAT_MAX = 2.5; // km at which heatmap saturates
+
+function render(){
+  const L = LAYERS.find(l=>l.id===state.layer);
+  const {comp,recs} = CACHE[state.layer];
+  const img = ctx.createImageData(W,H);
+  const d = img.data;
+  const bg = hexToRgb(cssVar("--map-bg")), land=hexToRgb(cssVar("--map-land"));
+  // base fill
+  for(let i=0;i<W*H;i++){
+    const o=i*4;
+    if(!mask[i]){ d[o]=bg[0];d[o+1]=bg[1];d[o+2]=bg[2];d[o+3]=255; continue; }
+    if(state.view==="heat"){
+      const c=rampColor(comp.dist[i]/HEAT_MAX);
+      d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255;
+    } else {
+      // regions coloured by cell area (bigger cell = more underserved)
+      const area=comp.cellArea[comp.owner[i]];
+      const t=Math.max(0,Math.min(1,(area-3)/22)); // ~3..25 km² → 0..1
+      const c=rampColor(t*0.9);
+      d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255;
+    }
+  }
+  ctx.putImageData(img,0,0);
+
+  // cell boundaries (Voronoi edges) in regions view
+  if(state.view==="cells"){
+    ctx.strokeStyle="rgba(255,255,255,.0)";
+    const line = hexToRgb(cssVar("--map-line"));
+    ctx.save(); ctx.globalAlpha=1;
+    ctx.beginPath();
+    for(let y=0;y<H;y++)for(let x=0;x<W-1;x++){
+      const i=y*W+x; if(!mask[i]||!mask[i+1])continue;
+      if(comp.owner[i]!==comp.owner[i+1]){ ctx.moveTo(x+1,y); ctx.lineTo(x+1,y+1); }
+    }
+    for(let y=0;y<H-1;y++)for(let x=0;x<W;x++){
+      const i=y*W+x; if(!mask[i]||!mask[i+W])continue;
+      if(comp.owner[i]!==comp.owner[i+W]){ ctx.moveTo(x,y+1); ctx.lineTo(x+1,y+1); }
+    }
+    ctx.strokeStyle=`rgba(${line[0]},${line[1]},${line[2]},.9)`; ctx.lineWidth=0.7; ctx.stroke();
+    ctx.restore();
+  }
+
+  // city outline
+  ctx.beginPath(); BOUNDARY.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
+  ctx.strokeStyle=cssVar("--map-line"); ctx.lineWidth=1.4; ctx.stroke();
+
+  // other layers faint
+  if(state.showAll){
+    LAYERS.forEach(o=>{ if(o.id===state.layer)return;
+      ctx.fillStyle=hexA(o.color,.28);
+      o.pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,2.2,0,7);ctx.fill();});
+    });
+  }
+  // active facilities
+  ctx.fillStyle=L.color; ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineWidth=1.4;
+  L.pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4.4,0,7);ctx.fill();ctx.stroke();});
+
+  // recommended sites
+  if(state.showRecs){
+    const acc=cssVar("--accent");
+    recs.slice(0,state._recN||3).forEach((r,idx)=>{
+      // white halo so the marker reads on any background (incl. deep red)
+      ctx.beginPath();ctx.arc(r.x,r.y,9,0,7);ctx.strokeStyle="rgba(255,255,255,.95)";ctx.lineWidth=4.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(r.x,r.y,9,0,7);ctx.strokeStyle=acc;ctx.lineWidth=2.4;ctx.stroke();
+      ctx.beginPath();ctx.arc(r.x,r.y,3.4,0,7);ctx.fillStyle="#fff";ctx.fill();
+      ctx.beginPath();ctx.arc(r.x,r.y,2.2,0,7);ctx.fillStyle=acc;ctx.fill();
+      // label with white outline
+      ctx.font="800 12px "+cssVar("--font");ctx.lineWidth=3;ctx.strokeStyle="rgba(255,255,255,.95)";
+      ctx.strokeText("R"+(idx+1), r.x+12, r.y-8);
+      ctx.fillStyle=acc;ctx.fillText("R"+(idx+1), r.x+12, r.y-8);
+    });
+  }
+  drawScale();
+}
+function drawScale(){
+  const km=2, px=km/kmPerPxX; // px for 2km
+  document.getElementById("scaleBar").style.width=(px* (document.getElementById("map").clientWidth/W)).toFixed(0)+"px";
+}
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexA(h,a){const c=hexToRgb(h);return `rgba(${c[0]},${c[1]},${c[2]},${a})`;}
+
+// ---------- side panel ----------
+function updateSide(){
+  const A=ANALYSIS[state.layer], C=CACHE[state.layer];
+  document.getElementById("sideLayer").textContent=A.label;
+  // recompute %underserved at current threshold
+  let u=0; for(let k=0;k<boundaryIdx.length;k++) if(C.comp.dist[boundaryIdx[k]]>state.thresh)u++;
+  const pct=100*u/C.comp.n;
+  const tiles=[
+    ["Facilities",A.facilities,"",""],
+    ["Mean access",A.meanKm,"km", A.meanKm<1?"good":""],
+    ["Median access",A.medianKm,"km",""],
+    ["Worst-served",A.worstKm,"km","flag"],
+    ["Underserved",pct.toFixed(0),"% of city", pct>35?"flag":(pct<12?"good":"")],
+    ["City area",A.cityAreaKm2,"km²",""],
+  ];
+  document.getElementById("tiles").innerHTML=tiles.map(t=>
+    `<div class="tile ${t[3]}"><div class="k">${t[0]}</div><div class="v">${t[1]}<span class="u"> ${t[2]}</span></div></div>`).join("");
+  // worst areas
+  const maxKm=C.worst[0].km;
+  document.getElementById("worst").innerHTML=C.worst.slice(0,5).map((w,i)=>
+    `<li><span class="rank">${i+1}</span><span class="nm">${w.name}</span>
+      <span class="bar-mini"><i style="width:${(100*w.km/maxKm).toFixed(0)}%"></i></span>
+      <span class="mv">${w.km.toFixed(1)} km</span></li>`).join("");
+  // recs
+  const recN=state._recN||3;
+  document.getElementById("recCount").textContent=recN;
+  document.getElementById("recs").innerHTML=C.recs.slice(0,recN).map((r,i)=>
+    `<li><span class="rank">R${i+1}</span><span class="nm">${r.area}
+       <div class="co">${r.lat.toFixed(4)}, ${r.lon.toFixed(4)}</div></span>
+       <span class="mv">${r.gapKm.toFixed(1)} km gap</span></li>`).join("");
+}
+
+// ---------- legend ----------
+function buildLegend(){
+  const L=LAYERS.find(l=>l.id===state.layer);
+  let html=`<span class="item"><span class="swatch" style="background:${L.color}"></span>${L.label} facility</span>`;
+  html+=`<span class="item"><span class="swatch" style="background:var(--accent);border-radius:50%"></span>Recommended new site</span>`;
+  if(state.view==="heat")
+    html+=`<span class="item ramp-wrap"><small>near</small><span class="ramp"></span><small>far · ≥${HEAT_MAX}km</small></span>`;
+  else
+    html+=`<span class="item ramp-wrap"><small>small cell</small><span class="ramp"></span><small>large · underserved</small></span>`;
+  document.getElementById("legend").innerHTML=html;
+}
+
+// ---------- controls ----------
+function buildLayerSeg(){
+  document.getElementById("layerSeg").innerHTML=LAYERS.map(l=>
+    `<button data-layer="${l.id}" aria-pressed="${l.id===state.layer}"><span class="dot" style="background:${l.color}"></span>${l.label}</button>`).join("");
+}
+function selectLayer(id){ state.layer=id;
+  document.querySelectorAll('#layerSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.layer===id));
+  buildLegend(); updateSide(); render();
+}
+function selectView(v){ state.view=v;
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.view===v));
+  buildLegend(); render();
+}
+document.getElementById("layerSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b)selectLayer(b.dataset.layer);});
+document.getElementById("viewSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b)selectView(b.dataset.view);});
+document.getElementById("thresh").addEventListener("input",e=>{state.thresh=+e.target.value;document.getElementById("threshVal").textContent=state.thresh.toFixed(1)+" km";updateSide();});
+document.getElementById("showRecs").addEventListener("change",e=>{state.showRecs=e.target.checked;render();});
+document.getElementById("showAll").addEventListener("change",e=>{state.showAll=e.target.checked;render();});
+
+// hover
+const ro=document.getElementById("readout");
+cv.addEventListener("pointermove",e=>{
+  const r=cv.getBoundingClientRect();
+  const x=Math.floor((e.clientX-r.left)/r.width*W), y=Math.floor((e.clientY-r.top)/r.height*H);
+  if(x<0||y<0||x>=W||y>=H){return;}
+  const i=y*W+x; const L=LAYERS.find(l=>l.id===state.layer); const C=CACHE[state.layer];
+  if(!mask[i]){ ro.innerHTML="Outside city boundary"; ro.style.opacity=".8"; return; }
+  const near=L.pts[C.comp.owner[i]];
+  ro.innerHTML=`<b>${y2lat(y).toFixed(4)}, ${x2lon(x).toFixed(4)}</b> &nbsp;·&nbsp; nearest ${L.label}: <b>${near.n}</b> &nbsp;·&nbsp; <b>${C.comp.dist[i].toFixed(2)} km</b>`;
+  ro.style.opacity="1";
+});
+cv.addEventListener("pointerleave",()=>{ro.innerHTML="Hover the map…";ro.style.opacity=".8";});
+
+// theme
+const themeBtn=document.getElementById("themeBtn");
+themeBtn.addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const sysDark=matchMedia("(prefers-color-scheme:dark)").matches;
+  const next=(cur? cur==="dark":sysDark)?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  buildLegend(); render();
+});
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{if(!document.documentElement.getAttribute("data-theme"))render();});
+
+// init
+buildLayerSeg(); buildLegend(); updateSide(); render();
+window.addEventListener("resize",drawScale);
+document.documentElement.setAttribute("data-ready","1");
+})();
+</script>
+</body>
+</html>

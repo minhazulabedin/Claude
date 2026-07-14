@@ -1,0 +1,440 @@
+{
+  "metro": {
+    "label": "Metro (MRT-6)",
+    "facilities": 16,
+    "meanKm": 2.92,
+    "medianKm": 2.57,
+    "worstKm": 8.6,
+    "p90Km": 5.87,
+    "pctUnderserved_1_5km": 73.4,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Bashundhara",
+        "km": 5.74,
+        "near": "Shewrapara",
+        "lon": 90.428,
+        "lat": 23.81
+      },
+      {
+        "name": "Dakshinkhan",
+        "km": 5.56,
+        "near": "Uttara North",
+        "lon": 90.42,
+        "lat": 23.872
+      },
+      {
+        "name": "Badda",
+        "km": 4.47,
+        "near": "Farmgate",
+        "lon": 90.426,
+        "lat": 23.78
+      },
+      {
+        "name": "Uttarkhan",
+        "km": 4.27,
+        "near": "Uttara North",
+        "lon": 90.405,
+        "lat": 23.882
+      },
+      {
+        "name": "Gulshan",
+        "km": 3.89,
+        "near": "Agargaon",
+        "lon": 90.415,
+        "lat": 23.792
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Bashundhara",
+        "lon": 90.4491,
+        "lat": 23.8322,
+        "gapKm": 8.6,
+        "x": 383,
+        "y": 203
+      },
+      {
+        "area": "Badda",
+        "lon": 90.4494,
+        "lat": 23.7754,
+        "gapKm": 6.28,
+        "x": 384,
+        "y": 410
+      },
+      {
+        "area": "Dakshinkhan",
+        "lon": 90.4226,
+        "lat": 23.8802,
+        "gapKm": 5.95,
+        "x": 294,
+        "y": 28
+      }
+    ]
+  },
+  "hosp": {
+    "label": "Hospitals",
+    "facilities": 15,
+    "meanKm": 2.23,
+    "medianKm": 2.09,
+    "worstKm": 6.82,
+    "p90Km": 3.91,
+    "pctUnderserved_1_5km": 69.7,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Turag",
+        "km": 4.79,
+        "near": "Kurmitola General",
+        "lon": 90.352,
+        "lat": 23.856
+      },
+      {
+        "name": "Uttarkhan",
+        "km": 3.94,
+        "near": "Kurmitola General",
+        "lon": 90.405,
+        "lat": 23.882
+      },
+      {
+        "name": "Dakshinkhan",
+        "km": 3.56,
+        "near": "Kurmitola General",
+        "lon": 90.42,
+        "lat": 23.872
+      },
+      {
+        "name": "Abdullahpur",
+        "km": 3.43,
+        "near": "Kurmitola General",
+        "lon": 90.397,
+        "lat": 23.878
+      },
+      {
+        "name": "Shyampur",
+        "km": 3.21,
+        "near": "Mugda Medical",
+        "lon": 90.435,
+        "lat": 23.698
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Turag",
+        "lon": 90.345,
+        "lat": 23.8846,
+        "gapKm": 6.82,
+        "x": 33,
+        "y": 12
+      },
+      {
+        "area": "Turag",
+        "lon": 90.3402,
+        "lat": 23.841,
+        "gapKm": 4.85,
+        "x": 17,
+        "y": 171
+      },
+      {
+        "area": "Dakshinkhan",
+        "lon": 90.4298,
+        "lat": 23.878,
+        "gapKm": 4.72,
+        "x": 318,
+        "y": 36
+      }
+    ]
+  },
+  "water": {
+    "label": "Water (WASA)",
+    "facilities": 10,
+    "meanKm": 2.33,
+    "medianKm": 2.15,
+    "worstKm": 7.05,
+    "p90Km": 4.07,
+    "pctUnderserved_1_5km": 71.7,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Dakshinkhan",
+        "km": 4.25,
+        "near": "Uttara Zone",
+        "lon": 90.42,
+        "lat": 23.872
+      },
+      {
+        "name": "Kamrangirchar",
+        "km": 3.77,
+        "near": "Chandnighat WTP",
+        "lon": 90.372,
+        "lat": 23.715
+      },
+      {
+        "name": "Cantonment",
+        "km": 3.71,
+        "near": "Mirpur Zone",
+        "lon": 90.395,
+        "lat": 23.825
+      },
+      {
+        "name": "Uttarkhan",
+        "km": 3.25,
+        "near": "Uttara Zone",
+        "lon": 90.405,
+        "lat": 23.882
+      },
+      {
+        "name": "Turag",
+        "km": 2.93,
+        "near": "Uttara Zone",
+        "lon": 90.352,
+        "lat": 23.856
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Dakshinkhan",
+        "lon": 90.4459,
+        "lat": 23.8486,
+        "gapKm": 7.05,
+        "x": 372,
+        "y": 143
+      },
+      {
+        "area": "Kamrangirchar",
+        "lon": 90.3619,
+        "lat": 23.7172,
+        "gapKm": 4.83,
+        "x": 90,
+        "y": 622
+      },
+      {
+        "area": "Turag",
+        "lon": 90.3402,
+        "lat": 23.8421,
+        "gapKm": 4.7,
+        "x": 17,
+        "y": 167
+      }
+    ]
+  },
+  "fuel": {
+    "label": "Fuel / CNG",
+    "facilities": 12,
+    "meanKm": 2.18,
+    "medianKm": 2.05,
+    "worstKm": 5.99,
+    "p90Km": 3.75,
+    "pctUnderserved_1_5km": 67.6,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Dakshinkhan",
+        "km": 4.29,
+        "near": "Uttara Pump",
+        "lon": 90.42,
+        "lat": 23.872
+      },
+      {
+        "name": "Kamrangirchar",
+        "km": 4.2,
+        "near": "Dhanmondi 27",
+        "lon": 90.372,
+        "lat": 23.715
+      },
+      {
+        "name": "Lalbagh / Old Dhaka",
+        "km": 4.16,
+        "near": "Dhanmondi 27",
+        "lon": 90.388,
+        "lat": 23.718
+      },
+      {
+        "name": "Uttarkhan",
+        "km": 3.52,
+        "near": "Uttara Pump",
+        "lon": 90.405,
+        "lat": 23.882
+      },
+      {
+        "name": "Cantonment",
+        "km": 3.45,
+        "near": "Bashundhara Pump",
+        "lon": 90.395,
+        "lat": 23.825
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Kamrangirchar",
+        "lon": 90.3744,
+        "lat": 23.6989,
+        "gapKm": 5.99,
+        "x": 132,
+        "y": 689
+      },
+      {
+        "area": "Dakshinkhan",
+        "lon": 90.4349,
+        "lat": 23.8689,
+        "gapKm": 5.68,
+        "x": 335,
+        "y": 69
+      },
+      {
+        "area": "Turag",
+        "lon": 90.3402,
+        "lat": 23.8393,
+        "gapKm": 4.64,
+        "x": 17,
+        "y": 177
+      }
+    ]
+  },
+  "bus": {
+    "label": "Bus stops",
+    "facilities": 14,
+    "meanKm": 2.15,
+    "medianKm": 2.01,
+    "worstKm": 5.91,
+    "p90Km": 3.77,
+    "pctUnderserved_1_5km": 66,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Turag",
+        "km": 4.75,
+        "near": "Uttara Azampur",
+        "lon": 90.352,
+        "lat": 23.856
+      },
+      {
+        "name": "Cantonment",
+        "km": 3.34,
+        "near": "Mirpur 10",
+        "lon": 90.395,
+        "lat": 23.825
+      },
+      {
+        "name": "Kamrangirchar",
+        "km": 2.92,
+        "near": "Science Lab",
+        "lon": 90.372,
+        "lat": 23.715
+      },
+      {
+        "name": "Mohammadpur",
+        "km": 2.57,
+        "near": "Gabtoli",
+        "lon": 90.359,
+        "lat": 23.765
+      },
+      {
+        "name": "Dakshinkhan",
+        "km": 2.44,
+        "near": "Abdullahpur",
+        "lon": 90.42,
+        "lat": 23.872
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Turag",
+        "lon": 90.3408,
+        "lat": 23.8541,
+        "gapKm": 5.91,
+        "x": 19,
+        "y": 123
+      },
+      {
+        "area": "Bashundhara",
+        "lon": 90.4479,
+        "lat": 23.8426,
+        "gapKm": 5.56,
+        "x": 379,
+        "y": 165
+      },
+      {
+        "area": "Kamrangirchar",
+        "lon": 90.3786,
+        "lat": 23.6964,
+        "gapKm": 4.72,
+        "x": 146,
+        "y": 698
+      }
+    ]
+  },
+  "fire": {
+    "label": "Fire stations",
+    "facilities": 8,
+    "meanKm": 2.34,
+    "medianKm": 2.19,
+    "worstKm": 6.65,
+    "p90Km": 3.99,
+    "pctUnderserved_1_5km": 74.5,
+    "cityAreaKm2": 217.3,
+    "worstAreas": [
+      {
+        "name": "Turag",
+        "km": 3.8,
+        "near": "Uttara",
+        "lon": 90.352,
+        "lat": 23.856
+      },
+      {
+        "name": "Cantonment",
+        "km": 3.46,
+        "near": "Mirpur",
+        "lon": 90.395,
+        "lat": 23.825
+      },
+      {
+        "name": "Dakshinkhan",
+        "km": 3.35,
+        "near": "Uttara",
+        "lon": 90.42,
+        "lat": 23.872
+      },
+      {
+        "name": "Hazaribagh",
+        "km": 2.79,
+        "near": "Central (Palashi)",
+        "lon": 90.37,
+        "lat": 23.735
+      },
+      {
+        "name": "Kamrangirchar",
+        "km": 2.78,
+        "near": "Central (Palashi)",
+        "lon": 90.372,
+        "lat": 23.715
+      }
+    ],
+    "recommendations": [
+      {
+        "area": "Bashundhara",
+        "lon": 90.4482,
+        "lat": 23.8418,
+        "gapKm": 6.65,
+        "x": 380,
+        "y": 168
+      },
+      {
+        "area": "Turag",
+        "lon": 90.3402,
+        "lat": 23.8464,
+        "gapKm": 5.28,
+        "x": 17,
+        "y": 151
+      },
+      {
+        "area": "Cantonment",
+        "lon": 90.4066,
+        "lat": 23.8283,
+        "gapKm": 4.47,
+        "x": 240,
+        "y": 217
+      }
+    ]
+  }
+}

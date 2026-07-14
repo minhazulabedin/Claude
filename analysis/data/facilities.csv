@@ -1,0 +1,76 @@
+service,name,latitude,longitude
+Metro (MRT-6),"Uttara North",23.869,90.3655
+Metro (MRT-6),"Uttara Center",23.86,90.3662
+Metro (MRT-6),"Uttara South",23.851,90.3672
+Metro (MRT-6),"Pallabi",23.8258,90.365
+Metro (MRT-6),"Mirpur 11",23.819,90.3652
+Metro (MRT-6),"Mirpur 10",23.8072,90.3685
+Metro (MRT-6),"Kazipara",23.799,90.3722
+Metro (MRT-6),"Shewrapara",23.792,90.3752
+Metro (MRT-6),"Agargaon",23.778,90.38
+Metro (MRT-6),"Bijoy Sarani",23.769,90.3835
+Metro (MRT-6),"Farmgate",23.758,90.3892
+Metro (MRT-6),"Karwan Bazar",23.751,90.393
+Metro (MRT-6),"Shahbagh",23.739,90.3952
+Metro (MRT-6),"Dhaka University",23.7325,90.3972
+Metro (MRT-6),"Secretariat",23.73,90.41
+Metro (MRT-6),"Motijheel",23.7268,90.4172
+Hospitals,"Dhaka Medical College",23.7258,90.398
+Hospitals,"BSMMU",23.7392,90.3942
+Hospitals,"Square Hospital",23.7522,90.3842
+Hospitals,"United Hospital",23.7975,90.4182
+Hospitals,"Evercare",23.815,90.4252
+Hospitals,"Ibn Sina Dhanmondi",23.746,90.373
+Hospitals,"Popular Dhanmondi",23.751,90.379
+Hospitals,"Nat. Heart Foundation",23.808,90.372
+Hospitals,"Kurmitola General",23.847,90.398
+Hospitals,"Mugda Medical",23.727,90.436
+Hospitals,"Holy Family",23.746,90.404
+Hospitals,"Suhrawardy",23.767,90.3752
+Hospitals,"Delta Medical",23.766,90.3665
+Hospitals,"Salahuddin Mirpur",23.806,90.369
+Hospitals,"Anwer Khan Modern",23.752,90.3772
+Water (WASA),"Saidabad WTP",23.712,90.435
+Water (WASA),"Chandnighat WTP",23.707,90.408
+Water (WASA),"WASA Bhaban",23.751,90.392
+Water (WASA),"Mirpur Zone",23.806,90.365
+Water (WASA),"Uttara Zone",23.865,90.379
+Water (WASA),"Gulshan Zone",23.792,90.414
+Water (WASA),"Mohammadpur Zone",23.765,90.358
+Water (WASA),"Motijheel Zone",23.728,90.42
+Water (WASA),"Jatrabari Zone",23.705,90.438
+Water (WASA),"Badda Zone",23.78,90.425
+Fuel / CNG,"Tejgaon Pump",23.759,90.4
+Fuel / CNG,"Mohakhali Pump",23.78,90.405
+Fuel / CNG,"Mirpur 1 Pump",23.799,90.353
+Fuel / CNG,"Uttara Pump",23.86,90.38
+Fuel / CNG,"Jatrabari Pump",23.71,90.432
+Fuel / CNG,"Dhanmondi 27",23.753,90.373
+Fuel / CNG,"Gulshan 1 Pump",23.78,90.415
+Fuel / CNG,"Malibagh Pump",23.75,90.415
+Fuel / CNG,"Shyamoli Pump",23.774,90.365
+Fuel / CNG,"Bashundhara Pump",23.818,90.428
+Fuel / CNG,"Khilgaon Pump",23.75,90.425
+Fuel / CNG,"Kamalapur Pump",23.733,90.426
+Bus stops,"Gabtoli",23.783,90.343
+Bus stops,"Mohakhali Terminal",23.778,90.405
+Bus stops,"Sayedabad Terminal",23.711,90.432
+Bus stops,"Farmgate",23.758,90.39
+Bus stops,"Shahbagh",23.739,90.395
+Bus stops,"Gulistan",23.726,90.412
+Bus stops,"Mirpur 10",23.8072,90.3685
+Bus stops,"Uttara Azampur",23.863,90.398
+Bus stops,"Jatrabari",23.71,90.435
+Bus stops,"Badda",23.784,90.426
+Bus stops,"Malibagh",23.75,90.416
+Bus stops,"Notun Bazar",23.797,90.425
+Bus stops,"Abdullahpur",23.878,90.397
+Bus stops,"Science Lab",23.739,90.384
+Fire stations,"Central (Palashi)",23.727,90.396
+Fire stations,"Mirpur",23.806,90.368
+Fire stations,"Mohammadpur",23.765,90.359
+Fire stations,"Tejgaon",23.76,90.397
+Fire stations,"Uttara",23.865,90.388
+Fire stations,"Postogola",23.7,90.428
+Fire stations,"Khilgaon",23.75,90.426
+Fire stations,"Gulshan",23.789,90.417

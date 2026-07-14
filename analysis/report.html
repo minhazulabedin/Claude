@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voronoi Accessibility Analysis of Dhaka City — Report</title>
+<style>
+  :root{
+    --bg:#f3f5f4; --paper:#ffffff; --paper-2:#f6f9f8; --line:#dde5e2;
+    --ink:#131f1b; --ink-2:#3d4f49; --muted:#6f817b; --accent:#0d7d6b; --accent-ink:#0a5f52;
+    --s-metro:#0072B2; --s-hosp:#D55E00; --s-water:#56B4E9; --s-fuel:#E69F00; --s-bus:#009E73; --s-fire:#CC79A7;
+    --crit:#c0391b; --good:#12876f;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0b100f;--paper:#121a18;--paper-2:#0e1614;--line:#233029;--ink:#e7efec;--ink-2:#b3c2bc;--muted:#7f918b;--accent:#2bb39b;--accent-ink:#8fe9d8;--crit:#f08a72;}
+  }
+  :root[data-theme="light"]{--bg:#f3f5f4;--paper:#fff;--paper-2:#f6f9f8;--line:#dde5e2;--ink:#131f1b;--ink-2:#3d4f49;--muted:#6f817b;--accent:#0d7d6b;--accent-ink:#0a5f52;--crit:#c0391b;}
+  :root[data-theme="dark"]{--bg:#0b100f;--paper:#121a18;--paper-2:#0e1614;--line:#233029;--ink:#e7efec;--ink-2:#b3c2bc;--muted:#7f918b;--accent:#2bb39b;--accent-ink:#8fe9d8;--crit:#f08a72;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:820px;margin:0 auto;background:var(--paper);padding:clamp(22px,5vw,64px);border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:100vh}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);font-weight:700}
+  h1{font-family:var(--serif);font-size:clamp(26px,4vw,38px);line-height:1.12;letter-spacing:-.01em;margin:.35em 0 .2em;text-wrap:balance}
+  h2{font-family:var(--serif);font-size:22px;margin:2.2em 0 .5em;padding-top:.6em;border-top:2px solid var(--ink);display:inline-block;letter-spacing:-.01em}
+  h3{font-size:15px;letter-spacing:.02em;margin:1.6em 0 .3em;color:var(--ink)}
+  p{margin:.6em 0}
+  .lede{font-size:18px;color:var(--ink-2);line-height:1.6;font-family:var(--serif)}
+  .byline{color:var(--muted);font-size:13px;margin-top:.4em;border-bottom:1px solid var(--line);padding-bottom:1.4em}
+  a{color:var(--accent-ink)}
+  code{font-family:var(--mono);font-size:.87em;background:var(--paper-2);padding:1px 5px;border-radius:5px;border:1px solid var(--line)}
+  .abstract{background:var(--paper-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;margin:1.6em 0;font-size:14.5px}
+  .abstract b{color:var(--accent-ink)}
+  figure{margin:1.6em 0;text-align:center}
+  figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper-2)}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:left;line-height:1.5}
+  figcaption b{color:var(--ink-2)}
+  .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.4em 0}
+  .grid6 figure{margin:0}
+  .grid6 img{border-radius:8px}
+  .grid6 figcaption{text-align:center;font-weight:700;color:var(--ink-2);margin-top:5px;font-size:12px}
+  @media (max-width:620px){.grid6{grid-template-columns:repeat(2,1fr)}}
+  table{width:100%;border-collapse:collapse;margin:1.2em 0;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th,td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{border-bottom:2px solid var(--ink);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  tbody tr:hover{background:var(--paper-2)}
+  td .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  .worst{color:var(--crit);font-weight:700}
+  .best{color:var(--good);font-weight:700}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:color-mix(in srgb,var(--crit) 14%,var(--paper));color:var(--crit);border:1px solid color-mix(in srgb,var(--crit) 30%,var(--line))}
+  ul,ol{padding-left:1.2em}
+  li{margin:.3em 0}
+  .zone{background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
+  .zone h3{margin:.1em 0 .3em;display:flex;align-items:center;gap:8px}
+  .zone .where{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .foot{margin-top:3em;padding-top:1.2em;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+  .toc{columns:2;font-size:13.5px;color:var(--ink-2);gap:30px;margin:1em 0 0}
+  .toc a{text-decoration:none;color:var(--ink-2)}
+  .toc a:hover{color:var(--accent-ink)}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin:1em 0}
+  .kpi div{flex:1;min-width:120px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi .n{font-size:22px;font-weight:800;font-family:var(--serif)}
+  .kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+  @media print{body{background:#fff}.sheet{border:0;max-width:none}h2{break-after:avoid}figure{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="eyebrow">Computational Geometry · Case Study</div>
+  <h1>Evaluating Utility-Service Accessibility in Dhaka City with Voronoi Diagrams</h1>
+  <p class="lede">Partitioning the city by nearest facility to measure how evenly six essential
+  services reach residents — and to locate, quantitatively, where a new facility would help most.</p>
+  <p class="byline">Methodological case study · analysis area 217.3 km² · 75 facilities across 6 services · figures and statistics generated by the accompanying interactive tool</p>
+
+  <div class="abstract">
+    <b>Abstract.</b> A Voronoi diagram assigns every point in a plane to its nearest site. Applied to a
+    city, it turns a scatter of facilities into <b>service regions</b> whose size and the distance-to-nearest
+    within them measure accessibility. We compile approximate coordinates for six utility services in Dhaka —
+    metro (MRT-6) stations, hospitals, water (WASA) points, fuel/CNG stations, bus stops and fire stations —
+    build their Voronoi partitions over the city boundary, and score coverage by distance-to-nearest facility.
+    Across all six services, <b>66–75% of the city lies more than 1.5 km from the nearest facility</b>, and the
+    consistently underserved belt is the <b>eastern fringe (Bashundhara–Badda)</b> and the <b>northern and
+    north-western periphery (Dakshinkhan, Uttarkhan, Turag)</b>. Using a largest-empty-circle rule we propose
+    three priority sites per service; several coincide, marking cross-cutting priority zones for investment.
+  </div>
+
+  <h2 id="toc" style="border:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Contents</h2>
+  <nav class="toc">
+    <a href="#intro">1 · Introduction &amp; objective</a><br>
+    <a href="#data">2 · Study area &amp; data</a><br>
+    <a href="#method">3 · Methodology</a><br>
+    <a href="#results">4 · Results by service</a><br>
+    <a href="#cross">5 · Cross-cutting findings</a><br>
+    <a href="#rec">6 · Recommendations</a><br>
+    <a href="#limits">7 · Limitations</a><br>
+    <a href="#repro">8 · The interactive tool</a>
+  </nav>
+
+  <h2 id="intro">1 · Introduction &amp; objective</h2>
+  <p>Dhaka is one of the world's densest cities, and its utility services have grown unevenly. Residents in
+  some neighbourhoods reach a hospital, a metro station or a fire station within a few hundred metres; others
+  travel several kilometres. Measuring that inequality objectively — not by anecdote — is a prerequisite for
+  planning where to invest next.</p>
+  <p><b>Objective.</b> Evaluate the spatial accessibility of utility services in Dhaka City using Voronoi
+  diagrams, identify well-served and underserved areas, and recommend where new facilities should be added or
+  existing services strengthened. Dhaka is used as the demonstrating case study.</p>
+  <p>The Voronoi diagram is the natural instrument for this question: it is exactly the geometry of
+  &ldquo;which facility is closest,&rdquo; so its cells <em>are</em> the service catchments, and the distance
+  to the cell's site <em>is</em> the travel burden a resident bears.</p>
+
+  <h2 id="data">2 · Study area &amp; data</h2>
+  <p>The analysis area is a polygon approximating Dhaka's built-up extent (Uttara and Turag in the north to
+  Shyampur and Jatrabari in the south; the Buriganga/Balu belts as rough east–west limits), covering
+  <b>217.3 km²</b>. We compiled approximate coordinates for 75 facilities across six services:</p>
+
+  <table>
+    <thead><tr><th>Service</th><th>Facilities</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--s-metro)"></span>Metro (MRT-6)</td><td>16</td><td style="text-align:left">Line-6 stations, Uttara North → Motijheel</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-hosp)"></span>Hospitals</td><td>15</td><td style="text-align:left">Major general &amp; specialist hospitals</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-water)"></span>Water (WASA)</td><td>10</td><td style="text-align:left">Treatment plants &amp; zonal MODS points</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fuel)"></span>Fuel / CNG</td><td>12</td><td style="text-align:left">Filling &amp; CNG stations</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-bus)"></span>Bus stops</td><td>14</td><td style="text-align:left">Terminals &amp; major stops</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fire)"></span>Fire stations</td><td>8</td><td style="text-align:left">Fire Service &amp; Civil Defence stations</td></tr>
+    </tbody>
+  </table>
+  <p>Coordinates are provided as <code>data/facilities.csv</code> (and 24 reference neighbourhoods as
+  <code>data/neighbourhoods.csv</code>). They are hand-compiled approximations for a methodological study, not an
+  official register — see <a href="#limits">§7</a>.</p>
+
+  <h2 id="method">3 · Methodology</h2>
+  <p>The pipeline has four stages, each reproducible in the accompanying tool.</p>
+  <h3>3.1 Voronoi partition</h3>
+  <p>For a set of facility sites <em>S</em>, the Voronoi cell of site <em>s</em> is every location closer to
+  <em>s</em> than to any other site. We compute the partition as a fine <b>distance raster</b>: the city is
+  sampled on a 420 × 740 grid (~30 m per pixel); each interior pixel is assigned to its nearest facility
+  (the cell it belongs to) and stores its <b>distance to that facility</b>. Cell boundaries are the pixels
+  where the nearest-facility label changes — the Voronoi edges.</p>
+  <h3>3.2 Projection &amp; distance</h3>
+  <p>Longitude/latitude are projected equirectangularly about 23.78°N, with
+  <code>1° lat ≈ 110.6 km</code> and <code>1° lon ≈ 101.9 km</code>, so straight-line distances are in
+  kilometres. These are Euclidean (as-the-crow-flies) distances, an upper bound on accessibility relative to
+  the real (longer) road-network distance.</p>
+  <h3>3.3 Accessibility metrics</h3>
+  <p>Over all interior pixels we report the <b>mean</b>, <b>median</b> and <b>worst-case</b> distance to the
+  nearest facility, and the <b>share of the city beyond a threshold</b> (default 1.5 km — a reasonable
+  walk/short-rickshaw catchment). A large Voronoi cell or a high distance both flag underservice.</p>
+  <h3>3.4 Recommending new sites</h3>
+  <p>New facilities are placed by the <b>largest-empty-circle</b> rule: the interior point farthest from every
+  existing facility is the location a new facility would relieve most. We apply it greedily — place the site,
+  add it to <em>S</em>, recompute, repeat — to propose the top priority sites for each service.</p>
+
+  <figure>
+    <img src="figures/00-dashboard.png" alt="The interactive analysis tool showing the metro coverage heatmap and statistics" />
+    <figcaption><b>Figure 1.</b> The interactive tool. Left: coverage heatmap for the metro layer, with recommended
+    new sites (R1–R3). Right: live accessibility statistics, the ranked underserved areas and the recommended
+    sites for the selected service. All figures and numbers in this report are produced by this tool.</figcaption>
+  </figure>
+
+  <h2 id="results">4 · Results by service</h2>
+  <p>The table ranks services from most to least accessible by mean distance-to-nearest. A striking result:
+  <b>the metro has the most facilities (16) yet the worst accessibility</b> — because its stations are
+  <em>collinear</em> (a single line), the whole eastern half of the city falls far outside any station's reach.
+  Point-distributed services (bus, fuel) cover area far more evenly with fewer facilities.</p>
+
+  <table>
+    <thead><tr><th>Service</th><th>Fac.</th><th>Mean km</th><th>Median km</th><th>90th pct</th><th>Worst km</th><th>&gt; 1.5 km</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--s-bus)"></span>Bus stops</td><td>14</td><td class="best">2.15</td><td>2.01</td><td>3.77</td><td>5.91</td><td>66.0%</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fuel)"></span>Fuel / CNG</td><td>12</td><td>2.18</td><td>2.05</td><td>3.75</td><td>5.99</td><td>67.6%</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-hosp)"></span>Hospitals</td><td>15</td><td>2.23</td><td>2.09</td><td>3.91</td><td>6.82</td><td>69.7%</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-water)"></span>Water (WASA)</td><td>10</td><td>2.33</td><td>2.15</td><td>4.07</td><td>7.05</td><td>71.7%</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fire)"></span>Fire stations</td><td>8</td><td>2.34</td><td>2.19</td><td>3.99</td><td>6.65</td><td>74.5%</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-metro)"></span>Metro (MRT-6)</td><td>16</td><td class="worst">2.92</td><td>2.57</td><td>5.87</td><td class="worst">8.60</td><td>73.4%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid6">
+    <figure><img src="figures/heat-bus.png" alt="Bus coverage heatmap"><figcaption>Bus stops</figcaption></figure>
+    <figure><img src="figures/heat-fuel.png" alt="Fuel coverage heatmap"><figcaption>Fuel / CNG</figcaption></figure>
+    <figure><img src="figures/heat-hosp.png" alt="Hospital coverage heatmap"><figcaption>Hospitals</figcaption></figure>
+    <figure><img src="figures/heat-water.png" alt="Water coverage heatmap"><figcaption>Water (WASA)</figcaption></figure>
+    <figure><img src="figures/heat-fire.png" alt="Fire station coverage heatmap"><figcaption>Fire stations</figcaption></figure>
+    <figure><img src="figures/heat-metro.png" alt="Metro coverage heatmap"><figcaption>Metro (MRT-6)</figcaption></figure>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin-top:-.4em"><b>Figure 2.</b> Coverage heatmaps, all six services. Light = close to a facility (well served); deep red = far (underserved). Teal rings mark recommended new sites. The eastern and peripheral red zones recur across every service.</p>
+
+  <h3>Worked example — metro regions</h3>
+  <p>Switching the tool to <b>Service regions</b> draws the Voronoi cells themselves, shaded by area. The metro's
+  cells fan out enormously toward the east: a handful of stations &ldquo;own&rdquo; the entire Gulshan–Badda–Bashundhara
+  side of the city, each resident there kilometres from a platform.</p>
+  <figure>
+    <img src="figures/cells-metro.png" alt="Metro Voronoi service regions shaded by cell area" style="max-width:64%" />
+    <figcaption><b>Figure 3.</b> Metro Voronoi regions, shaded by cell area (larger = more underserved). The eastern
+    cells are the largest in the study — the clearest signal of a coverage gap.</figcaption>
+  </figure>
+
+  <h2 id="cross">5 · Cross-cutting findings</h2>
+  <p>Reading the six maps together, the same places surface as underserved regardless of service:</p>
+  <div class="kpi">
+    <div><div class="n">66–75%</div><div class="l">of city &gt; 1.5 km from nearest facility</div></div>
+    <div><div class="n">East</div><div class="l">Bashundhara–Badda gap in 3+ services</div></div>
+    <div><div class="n">Fringe</div><div class="l">North &amp; NW periphery persistently far</div></div>
+  </div>
+  <ul>
+    <li><b>Eastern belt — Bashundhara, Vatara, Badda.</b> The single largest gap. Appears as a top underserved area
+      or recommended site for metro, bus and fire, and is deep-red on every heatmap.</li>
+    <li><b>Northern fringe — Dakshinkhan, Uttarkhan, Abdullahpur.</b> Far from metro, hospitals, water and fuel;
+      the built edge has outrun its services.</li>
+    <li><b>North-west — Turag.</b> The worst-served point for hospitals, water, bus and fire.</li>
+    <li><b>South-west — Kamrangirchar, Hazaribagh.</b> River-hemmed and dense, yet distant from water, fuel, bus and fire.</li>
+    <li><b>Cantonment &amp; central-north</b> read as gaps too, though partly because the land is restricted rather than residential.</li>
+    <li><b>Well served:</b> the Motijheel–Shahbagh–Dhanmondi–Farmgate core, where every service clusters.</li>
+  </ul>
+
+  <h2 id="rec">6 · Recommendations</h2>
+  <p>For each service the tool proposes the three highest-impact new sites (largest current gap, in km). The
+  &ldquo;gap&rdquo; is the distance from the proposed site to the nearest existing facility — i.e. how far the
+  worst-off resident there travels today.</p>
+  <table>
+    <thead><tr><th>Service</th><th>Site 1 (gap)</th><th>Site 2 (gap)</th><th>Site 3 (gap)</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--s-metro)"></span>Metro</td><td>Bashundhara (8.6)</td><td>Badda (6.3)</td><td>Dakshinkhan (6.0)</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-hosp)"></span>Hospitals</td><td>Turag (6.8)</td><td>Turag S (4.9)</td><td>Dakshinkhan (4.7)</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-water)"></span>Water</td><td>Dakshinkhan (7.1)</td><td>Kamrangirchar (4.8)</td><td>Turag (4.7)</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fuel)"></span>Fuel / CNG</td><td>Kamrangirchar (6.0)</td><td>Dakshinkhan (5.7)</td><td>Turag (4.6)</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-bus)"></span>Bus</td><td>Turag (5.9)</td><td>Bashundhara (5.6)</td><td>Kamrangirchar (4.7)</td></tr>
+      <tr><td><span class="dot" style="background:var(--s-fire)"></span>Fire</td><td>Bashundhara (6.7)</td><td>Turag (5.3)</td><td>Cantonment (4.5)</td></tr>
+    </tbody>
+  </table>
+  <p>Because the same names recur, we consolidate them into <b>cross-cutting priority zones</b> — build once,
+  relieve several services:</p>
+
+  <div class="zone"><h3><span class="tag">Priority 1</span> Eastern belt — Bashundhara / Vatara / Badda</h3>
+    <div class="where">≈ 23.78–23.83 N, 90.42–90.45 E</div>
+    <p style="margin:.4em 0 0">The largest and most repeated gap. Priority for a metro feeder/extension eastward, plus
+    a fire station and additional bus provision. Fast-urbanising, high-density — the highest-return zone.</p></div>
+  <div class="zone"><h3><span class="tag">Priority 2</span> Northern fringe — Dakshinkhan / Uttarkhan / Abdullahpur</h3>
+    <div class="where">≈ 23.87–23.88 N, 90.40–90.42 E</div>
+    <p style="margin:.4em 0 0">Recommended for water, fuel, hospital and metro-access improvements — the built edge
+    has grown past its service network.</p></div>
+  <div class="zone"><h3><span class="tag">Priority 3</span> North-west &amp; south-west — Turag and Kamrangirchar</h3>
+    <div class="where">Turag ≈ 23.85 N, 90.34 E · Kamrangirchar ≈ 23.71 N, 90.37 E</div>
+    <p style="margin:.4em 0 0">Two dense, river-hemmed pockets that are worst-served for several everyday services
+    (hospitals, water, fire, fuel). Small, well-placed additions would sharply cut travel distance.</p></div>
+
+  <h2 id="limits">7 · Limitations</h2>
+  <ul>
+    <li><b>Approximate data.</b> Coordinates are hand-compiled for a methodological demonstration, not surveyed;
+      counts are representative, not exhaustive. Conclusions are about <em>method and pattern</em>, not exact metres.</li>
+    <li><b>Straight-line distance.</b> Real travel follows roads, rivers and congestion; Euclidean distance
+      under-states true travel time. Rivers and the airport/cantonment also break the &ldquo;anyone can go anywhere&rdquo;
+      assumption a plain Voronoi makes.</li>
+    <li><b>Demand-blind.</b> The analysis weights area, not population. A large cell over low-density land matters
+      less than a smaller one over a dense settlement; a population-weighted Voronoi is the natural next step.</li>
+    <li><b>Capacity-blind.</b> Nearest ≠ adequate — a close but overloaded hospital still under-serves.</li>
+  </ul>
+
+  <h2 id="repro">8 · The interactive tool</h2>
+  <p>Open <code>voronoi-dhaka.html</code> in any browser (double-click — it needs no server or internet). Switch
+  the utility service, toggle between the coverage heatmap and the Voronoi regions, drag the underserved-distance
+  threshold, and hover any point to read its coordinates, nearest facility and distance. Every statistic and
+  figure in this report is generated live by that page from <code>data/facilities.csv</code>.</p>
+
+  <div class="foot">
+    <b>Reproducibility.</b> Method: nearest-facility distance raster over the city polygon (equirectangular
+    projection, 23.78°N) → Voronoi cells + per-pixel accessibility → greedy largest-empty-circle siting.
+    Files: <code>voronoi-dhaka.html</code> (tool), <code>report.html</code> (this document),
+    <code>figures/</code> (maps), <code>data/facilities.csv</code>, <code>data/neighbourhoods.csv</code>.
+    <br><br><b>Disclaimer.</b> Approximate data for educational analysis. Not an official service record; do not
+    use for operational or emergency planning.
+  </div>
+
+</div>
+</body>
+</html>
