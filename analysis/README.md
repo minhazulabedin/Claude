@@ -11,6 +11,7 @@ and new-facility sites are recommended where the gap is largest.
 | File | What it is |
 |------|-----------|
 | **`voronoi-dhaka.html`** | The interactive tool — **double-click to open** (no server, works offline). Switch service, toggle heatmap ↔ Voronoi regions, drag the underserved threshold, hover for coordinates/distance. |
+| **`voronoi-construct.html`** | Proper construction of the three faculty-sketch Voronoi diagrams (exact straight bisector edges). Drag seeds, add/remove points, toggle the bisector-construction overlay. |
 | **`report.html`** | The written report (double-click to open, or print to PDF). |
 | **`Voronoi-Dhaka-Report.pdf`** | The report as a ready-to-submit PDF. |
 | `figures/` | Coverage heatmaps and Voronoi-region maps for every service (PNG). |

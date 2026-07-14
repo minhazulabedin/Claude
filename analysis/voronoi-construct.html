@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voronoi Diagrams — Proper Construction</title>
+<style>
+  :root{
+    --bg:#eef2f1;--surface:#fff;--surface-2:#f5f8f7;--line:#d9e2df;--ink:#12211d;--ink-2:#3f524c;
+    --muted:#71847d;--accent:#0d7d6b;--accent-ink:#0a5f52;--shadow:0 1px 2px rgba(16,40,34,.06),0 8px 24px rgba(16,40,34,.07);
+    --edge:#1d2f2a;--seed:#12211d;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0c1211;--surface:#141c1a;--surface-2:#101715;--line:#22302c;--ink:#e7efec;--ink-2:#adbdb7;
+      --muted:#7d908a;--accent:#2bb39b;--accent-ink:#8fe9d8;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);
+      --edge:#dfeae6;--seed:#eef4f2;}
+  }
+  :root[data-theme="light"]{--bg:#eef2f1;--surface:#fff;--surface-2:#f5f8f7;--line:#d9e2df;--ink:#12211d;--ink-2:#3f524c;--muted:#71847d;--accent:#0d7d6b;--accent-ink:#0a5f52;--edge:#1d2f2a;--seed:#12211d;--shadow:0 1px 2px rgba(16,40,34,.06),0 8px 24px rgba(16,40,34,.07);}
+  :root[data-theme="dark"]{--bg:#0c1211;--surface:#141c1a;--surface-2:#101715;--line:#22302c;--ink:#e7efec;--ink-2:#adbdb7;--muted:#7d908a;--accent:#2bb39b;--accent-ink:#8fe9d8;--edge:#dfeae6;--seed:#eef4f2;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);}
+  *{box-sizing:border-box}html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased;padding:clamp(12px,3vw,28px)}
+  .wrap{max-width:1000px;margin:0 auto}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);font-weight:700}
+  h1{font-size:clamp(20px,3vw,27px);margin:5px 0 4px;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+  .sub{color:var(--muted);margin:0 0 18px;font-size:14px;max-width:66ch}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .theme-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink-2);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;box-shadow:var(--shadow)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:12px}
+  .btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  .btn.on{background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 34%,var(--line))}
+  .chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer}
+  .chk input{accent-color:var(--accent);width:16px;height:16px}
+  .hint{font-size:12.5px;color:var(--muted);margin-left:auto}
+  .stage{position:relative;width:100%;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line)}
+  canvas{display:block;width:100%;height:auto;cursor:crosshair;touch-action:none}
+  .note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:14px}
+  .note b{color:var(--ink-2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .k{width:22px;height:0;border-top:2px solid var(--edge)}
+  .kd{width:22px;height:0;border-top:2px dashed var(--muted)}
+  .ks{width:11px;height:11px;border-radius:50%;background:var(--seed)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Voronoi construction · from the faculty sketch</div>
+      <h1>Three Voronoi Diagrams, Done Properly</h1>
+      <p class="sub">Each cell is the set of points closest to one seed. Done correctly, every boundary is the
+        <b>perpendicular bisector</b> of two seeds — a straight segment — and three cells meet at each vertex.
+        Drag any seed to match the drawing; click empty space to add one; double-click a seed to remove it.</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">◐ Theme</button>
+  </div>
+
+  <div class="card">
+    <div class="bar">
+      <button class="btn" id="biBtn" type="button">Show bisector construction</button>
+      <button class="btn" id="fillBtn" type="button">Toggle cell fills</button>
+      <button class="btn" id="resetBtn" type="button">Reset to sketch</button>
+      <label class="chk"><input type="checkbox" id="lbl" checked /> Seed labels</label>
+      <span class="hint">Drag seeds · click to add · double-click to remove</span>
+    </div>
+    <div class="stage"><canvas id="cv" width="960" height="900"></canvas></div>
+    <div class="legend">
+      <span><span class="k"></span>Voronoi edge (perpendicular bisector)</span>
+      <span><span class="ks"></span>Seed / site</span>
+      <span><span class="kd"></span>Bisector construction (toggle)</span>
+    </div>
+    <p class="note"><b>Why this is “proper”.</b> The faculty's freehand cells had curved boundaries. For ordinary
+      (Euclidean) distance the boundary between two seeds is exactly their perpendicular bisector, so real Voronoi
+      edges are <b>straight lines</b> that meet three-at-a-time at vertices. This tool computes each cell by
+      intersecting half-planes (one per other seed) — the exact Voronoi diagram — so what you see is geometrically correct.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const W=960,H=900;
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- panels (approximate the faculty's three sketches) ----------
+function blobPath(cx,cy,r,f){
+  const n=f.length,P=[];
+  for(let i=0;i<n;i++){const a=i/n*2*Math.PI-Math.PI/2;P.push([cx+Math.cos(a)*r*f[i],cy+Math.sin(a)*r*f[i]]);}
+  const path=new Path2D(); const mid=i=>[(P[i][0]+P[(i+1)%n][0])/2,(P[i][1]+P[(i+1)%n][1])/2];
+  let m=mid(n-1); path.moveTo(m[0],m[1]);
+  for(let i=0;i<n;i++){const q=mid(i);path.quadraticCurveTo(P[i][0],P[i][1],q[0],q[1]);}
+  path.closePath(); return path;
+}
+function bboxOf(cx,cy,r){const R=r*1.7;return [[cx-R,cy-R],[cx+R,cy-R],[cx+R,cy+R],[cx-R,cy+R]];}
+
+const PANELS=[
+  { id:"PB", label:"P.B", cx:245, cy:250, r:170, numbered:false,
+    f:[1,.86,1.05,.8,1.08,.82,1.02,.9,1.1,.84],
+    seeds:[[165,190],[290,175],[315,265],[210,330],[135,275],[240,250]] },
+  { id:"MR", label:"M.R", cx:710, cy:250, r:165, numbered:true,
+    f:[.95,1.08,.85,1.06,.82,1.1,.86,1.04,.9,1.02],
+    seeds:[[650,195],[775,205],[790,300],[655,315]] },
+  { id:"PH", label:"Phiruz", cx:470, cy:670, r:185, numbered:false,
+    f:[1.02,.84,1.1,.82,1.05,.9,1.08,.8,1.06,.88],
+    seeds:[[380,600],[560,600],[585,720],[430,745],[470,660]] },
+];
+const DEFAULT=JSON.parse(JSON.stringify(PANELS.map(p=>p.seeds)));
+PANELS.forEach(p=>{p.bbox=bboxOf(p.cx,p.cy,p.r); p.path=blobPath(p.cx,p.cy,p.r,p.f);});
+
+const TINTS=["#cfe6f5","#f7e2c0","#cdeee3","#ecd9e8","#d9eefb","#f6efc6","#e3ead0"];
+const TINTS_D=["#1e3a4a","#463a24","#1f3f38","#3d2a3a","#22384a","#3f3a24","#2e3826"];
+
+// ---------- exact Voronoi via half-plane clipping ----------
+function clipHalf(poly,nx,ny,c){
+  const out=[],N=poly.length; if(!N)return out;
+  for(let i=0;i<N;i++){
+    const A=poly[i],B=poly[(i+1)%N];
+    const da=A[0]*nx+A[1]*ny-c, db=B[0]*nx+B[1]*ny-c;
+    const inA=da<=1e-7, inB=db<=1e-7;
+    if(inA)out.push(A);
+    if(inA!==inB){const t=da/(da-db);out.push([A[0]+t*(B[0]-A[0]),A[1]+t*(B[1]-A[1])]);}
+  }
+  return out;
+}
+function cellOf(si,seeds,bbox){
+  let poly=bbox.map(p=>[p[0],p[1]]); const s=seeds[si];
+  for(let j=0;j<seeds.length;j++){ if(j===si)continue; const o=seeds[j];
+    const nx=o[0]-s[0], ny=o[1]-s[1];
+    const c=(o[0]*o[0]+o[1]*o[1]-s[0]*s[0]-s[1]*s[1])/2;
+    poly=clipHalf(poly,nx,ny,c); if(!poly.length)break;
+  }
+  return poly;
+}
+
+let state={bisectors:false, fills:true, labels:true};
+function render(){
+  const dark=isDark();
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=cssVar("--surface"); ctx.fillRect(0,0,W,H);
+  // guide cross (like the card)
+  ctx.strokeStyle=cssVar("--line"); ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(W/2,40);ctx.lineTo(W/2,H*0.52);ctx.moveTo(70,H*0.42);ctx.lineTo(W-70,H*0.42);ctx.stroke();
+
+  PANELS.forEach((pn,pi)=>{
+    const seeds=pn.seeds;
+    // fills + edges, clipped to blob
+    ctx.save(); ctx.clip(pn.path);
+    seeds.forEach((s,si)=>{
+      const poly=cellOf(si,seeds,pn.bbox); if(poly.length<3)return;
+      ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+      if(state.fills){ ctx.fillStyle=(dark?TINTS_D:TINTS)[si%7]; ctx.globalAlpha=dark?.55:.85; ctx.fill(); ctx.globalAlpha=1; }
+      ctx.lineJoin="round"; ctx.strokeStyle=cssVar("--edge"); ctx.lineWidth=2.1; ctx.stroke();
+    });
+    // bisector construction overlay
+    if(state.bisectors){
+      ctx.setLineDash([5,5]);
+      for(let a=0;a<seeds.length;a++)for(let b=a+1;b<seeds.length;b++){
+        const dx=seeds[b][0]-seeds[a][0],dy=seeds[b][1]-seeds[a][1];
+        if(Math.hypot(dx,dy)>pn.r*1.25)continue;
+        ctx.strokeStyle=cssVar("--muted");ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(seeds[a][0],seeds[a][1]);ctx.lineTo(seeds[b][0],seeds[b][1]);ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+    // blob outline
+    ctx.strokeStyle=cssVar("--ink-2");ctx.lineWidth=1.6;ctx.stroke(pn.path);
+    // seeds
+    seeds.forEach((s,si)=>{
+      ctx.beginPath();ctx.arc(s[0],s[1],5.5,0,7);
+      ctx.fillStyle=cssVar("--surface");ctx.fill();
+      ctx.beginPath();ctx.arc(s[0],s[1],4,0,7);ctx.fillStyle=cssVar("--seed");ctx.fill();
+      if(state.labels){
+        ctx.fillStyle=cssVar("--ink");ctx.font="700 14px "+cssVar("--font");
+        const t=pn.numbered?String(si+1):String.fromCharCode(97+si);
+        ctx.fillText(t, s[0]+9, s[1]-7);
+      }
+    });
+    // panel label
+    ctx.fillStyle=cssVar("--accent-ink");ctx.font="800 20px "+cssVar("--font");
+    ctx.fillText(pn.label, pn.cx-pn.r*0.7, pn.cy-pn.r-6);
+  });
+}
+function isDark(){const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":matchMedia("(prefers-color-scheme:dark)").matches;}
+
+// ---------- interaction ----------
+let drag=null;
+function toCanvas(e){const r=cv.getBoundingClientRect();return [ (e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H ];}
+function hit(x,y){ for(const pn of PANELS)for(let i=0;i<pn.seeds.length;i++){const s=pn.seeds[i];if(Math.hypot(s[0]-x,s[1]-y)<12)return {pn,i};} return null; }
+function panelAt(x,y){ for(const pn of PANELS){ if(ctx.isPointInPath(pn.path,x,y))return pn; } return null; }
+cv.addEventListener("pointerdown",e=>{ const [x,y]=toCanvas(e); const h=hit(x,y);
+  if(h){drag=h;cv.setPointerCapture(e.pointerId);return;}
+  const pn=panelAt(x,y); if(pn){pn.seeds.push([x,y]);render();}
+});
+cv.addEventListener("pointermove",e=>{ if(!drag)return; const [x,y]=toCanvas(e); drag.pn.seeds[drag.i]=[x,y]; render(); });
+cv.addEventListener("pointerup",()=>{drag=null;});
+cv.addEventListener("dblclick",e=>{ const [x,y]=toCanvas(e); const h=hit(x,y); if(h&&h.pn.seeds.length>2){h.pn.seeds.splice(h.i,1);render();} });
+
+document.getElementById("biBtn").addEventListener("click",e=>{state.bisectors=!state.bisectors;e.target.classList.toggle("on",state.bisectors);render();});
+document.getElementById("fillBtn").addEventListener("click",e=>{state.fills=!state.fills;e.target.classList.toggle("on",!state.fills);render();});
+document.getElementById("lbl").addEventListener("change",e=>{state.labels=e.target.checked;render();});
+document.getElementById("resetBtn").addEventListener("click",()=>{PANELS.forEach((p,i)=>p.seeds=JSON.parse(JSON.stringify(DEFAULT[i])));render();});
+document.getElementById("themeBtn").addEventListener("click",()=>{const cur=document.documentElement.getAttribute("data-theme");const sys=matchMedia("(prefers-color-scheme:dark)").matches;const next=(cur?cur==="dark":sys)?"light":"dark";document.documentElement.setAttribute("data-theme",next);render();});
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{if(!document.documentElement.getAttribute("data-theme"))render();});
+
+render();
+document.documentElement.setAttribute("data-ready","1");
+window.__render=render;
+})();
+</script>
+</body>
+</html>
