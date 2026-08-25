@@ -24,8 +24,8 @@ Edit the constants at the top of `build_submission_pdf.py`:
 
 ```python
 STUDENT_NAME = "Minhazul Abedin"
-STUDENT_ID   = "________________"
-SECTION      = "________"
+STUDENT_ID   = "21-44625-1"
+SECTION      = "C"
 SEMESTER     = "Summer 25-26"
 PROMPT       = "PS C:\\Users\\Minhaz\\Desktop\\AI Lab>"   # prompt in the terminal shots
 WORKSPACE    = "AI Lab"                                   # folder in the title bar

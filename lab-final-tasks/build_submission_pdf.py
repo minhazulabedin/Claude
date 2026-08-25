@@ -18,8 +18,8 @@ import sys
 # EDIT THESE, then re-run the script to regenerate the PDF.
 # ----------------------------------------------------------------------
 STUDENT_NAME = "Minhazul Abedin"
-STUDENT_ID = "________________"
-SECTION = "________"
+STUDENT_ID = "21-44625-1"
+SECTION = "C"
 SEMESTER = "Summer 25-26"
 COURSE = "Artificial Intelligence — Final Lab Task"
 PROMPT = "PS C:\\Users\\Minhaz\\Desktop\\AI Lab>"   # shell prompt shown in the terminal shots
@@ -231,6 +231,9 @@ h3 { font-size:10.5pt; margin:9px 0 5px; color:#1f2937;
 .desc b { color:#14181f; }
 img { display:block; border:1px solid #b9c2cf; }
 .note { font-size:8.2pt; color:#5c6878; margin:-2px 0 6px; font-style:italic; }
+.codetxt { font-family:"DejaVu Sans Mono",monospace; font-size:8.6pt; line-height:1.32;
+           white-space:pre; background:#f4f6f9; border:1px solid #c9d2de;
+           border-radius:4px; padding:9px 12px; margin:0 0 8px; }
 .pb { break-before:page; }
 .group { break-inside:avoid; }
 """
@@ -293,6 +296,10 @@ def main():
   right, or move down to the next row) and <b>executes</b> it, printing the environment after every
   action until every cell is clean.</p>
 
+  <h3>Code</h3>
+  <pre class="codetxt">%(t2code)s</pre>
+
+  <div class="pb"></div>
   <h3>Code Screenshot</h3>
   %(c2a)s
   <div class="pb"></div>
@@ -308,6 +315,7 @@ def main():
 
 </body></html>""" % {
         "css": PAGE_CSS, "course": html.escape(COURSE),
+        "t2code": html.escape("\n".join(t2src)),
         "name": html.escape(STUDENT_NAME), "sid": html.escape(STUDENT_ID),
         "sec": html.escape(SECTION), "sem": html.escape(SEMESTER),
         "c1a": img(s("task1_code_1.png"), 700), "c1b": img(s("task1_code_2.png"), 700),
