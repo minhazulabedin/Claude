@@ -1,13 +1,11 @@
-# =========================================================
-# Final Lab Task 2 - Simple Rule-Based Vacuum Cleaning Agent
-# 2-D grid world:  'D' = Dirty cell,  '.' = Clean cell,  'A' = Agent
-# =========================================================
+# Final Lab Task 2
+# Simple Rule-Based Vacuum Cleaning Agent
 
-ROWS = 4
-COLS = 4
+rows = 4
+cols = 4
 
-# The environment: each cell is either Dirty ('D') or Clean ('.')
-environment = [
+# 'D' = dirty cell , '.' = clean cell
+grid = [
     ['D', '.', 'D', '.'],
     ['D', '.', 'D', '.'],
     ['D', '.', '.', '.'],
@@ -15,69 +13,43 @@ environment = [
 ]
 
 
-def display(grid, agent_row, agent_col):
-    """Print the current world. The agent's own cell is shown as 'A'."""
-    for r in range(ROWS):
-        for c in range(COLS):
-            if r == agent_row and c == agent_col:
-                print('A', end=' ')
+def show_grid(r, c):
+    for i in range(rows):
+        for j in range(cols):
+            if i == r and j == c:
+                print('A', end=' ')          # A = agent position
             else:
-                print(grid[r][c], end=' ')
+                print(grid[i][j], end=' ')
         print()
-    print('-' * 20)
+    print('--------------------')
 
 
-def perceive(grid, row, col):
-    """PERCEPTION: is the agent's current location dirty?"""
-    return grid[row][col] == 'D'
+row = 0
+col = 0
+count = 0
 
+print("Initial Environment:")
+show_grid(row, col)
 
-def clean(grid, row, col):
-    """ACTION: suck the dirt in the current cell."""
-    grid[row][col] = '.'
+while True:
 
+    # rule 1 : if the current cell is dirty then clean it
+    if grid[row][col] == 'D':
+        grid[row][col] = '.'
+        count = count + 1
+        print(f"Cleaned cell at ({row}, {col})")
+        show_grid(row, col)
 
-def next_position(row, col):
-    """
-    ACTION: decide the next move.
-      - move RIGHT while cells remain in the current row
-      - otherwise move DOWN to the start of the next row
-      - return None when the whole grid has been scanned
-    """
-    if col < COLS - 1:
-        return row, col + 1
-    elif row < ROWS - 1:
-        return row + 1, 0
-    return None
+    # rule 2 : otherwise move to the next cell
+    if col < cols - 1:
+        col = col + 1                        # move right
+    elif row < rows - 1:
+        row = row + 1                        # move down
+        col = 0
+    else:
+        break                                # whole grid is scanned
 
+    show_grid(row, col)
 
-def vacuum_agent(grid):
-    """Simple rule-based agent: perceive -> decide -> act, over the whole grid."""
-    row, col = 0, 0
-    cleaned = 0
-
-    print("Initial Environment:")
-    display(grid, row, col)
-
-    while True:
-        # RULE 1: if the current cell is dirty, then clean it
-        if perceive(grid, row, col):
-            clean(grid, row, col)
-            cleaned += 1
-            print("Cleaned cell at (%d, %d)" % (row, col))
-            display(grid, row, col)
-
-        # RULE 2: otherwise move to the next cell of the environment
-        step = next_position(row, col)
-        if step is None:
-            break
-        row, col = step
-        display(grid, row, col)
-
-    display(grid, row, col)
-    print("Cleaning complete. Total cells cleaned:", cleaned)
-
-
-# ---------------------- MAIN ----------------------
-if __name__ == "__main__":
-    vacuum_agent(environment)
+show_grid(row, col)
+print("Cleaning complete. Total cells cleaned:", count)
