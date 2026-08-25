@@ -7,16 +7,13 @@ const {
 const DIR = "/home/user/Claude/lab-final-tasks";
 const SHOTS = path.join(DIR, "screenshots");
 
-// image helper: scale to `widthPx` (96dpi px), keep aspect from real dimensions
-const DIMS = {
-  "task1_code_1.png": [1640, 1250], "task1_code_2.png": [1640, 1250],
-  "task1_output.png": [1640, 502],
-  "task2_code_1.png": [1640, 1330], "task2_code_2.png": [1640, 1290],
-  "task2_output_1.png": [1640, 2390], "task2_output_2.png": [1640, 2390],
-  "task2_output_3.png": [1640, 2390],
-};
+// image helper: scale to `widthPx` (96dpi px), aspect read from the PNG header
+function pngSize(file) {
+  const b = fs.readFileSync(file);
+  return [b.readUInt32BE(16), b.readUInt32BE(20)];
+}
 function shot(name, widthPx) {
-  const [w, h] = DIMS[name];
+  const [w, h] = pngSize(path.join(SHOTS, name));
   return new Paragraph({
     children: [new ImageRun({
       type: "png",

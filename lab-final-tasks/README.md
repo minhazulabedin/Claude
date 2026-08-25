@@ -37,6 +37,9 @@ then run:
 python3 build_submission_pdf.py
 ```
 
-The screenshots are rendered by headless Chromium (VS Code "Dark+" theme), not
-captured from a real machine — the code and the console output in them are real,
-but the window chrome and shell prompt are cosmetic.
+The screenshots are rendered by headless Chromium as a complete VS Code
+(Dark+) window — title bar and menus, activity bar, breadcrumbs, minimap,
+indent guides, bracket-pair colours, cursor and status bar, in Cascadia
+Mono — not captured from a real machine. The code and console output in
+them are real; the window chrome is cosmetic. The generated PDF carries
+neutral metadata (title and author only).
