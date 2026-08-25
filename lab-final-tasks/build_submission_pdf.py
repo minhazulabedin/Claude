@@ -34,9 +34,9 @@ SHOTS = os.path.join(HERE, "screenshots")
 SHELL = "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"
 
 WIN_W = 1000                 # CSS px, whole VS Code window
-ED_LINE = 20                 # editor line height at 13px Cascadia
+ED_LINE = 19                 # editor line height at default 14px
 VIEWPORT = 32                # visible editor lines per screenshot
-TM_LINE = 17                 # terminal line height at 12px
+TM_LINE = 18                 # terminal line height at default 14px
 
 MONO = '"Cascadia Mono","DejaVu Sans Mono",monospace'
 UI = '"Segoe UI","Liberation Sans","DejaVu Sans",sans-serif'
@@ -149,15 +149,16 @@ def render_lines(code, cursor_line=None):
 
 SVG = {
     "files": '<path d="M13.5 4H7v16h11V8.5L13.5 4z"/><path d="M13.5 4v4.5H18"/>',
-    "search": '<circle cx="10.5" cy="10.5" r="5"/><path d="M14.5 14.5L19 19"/>',
+    "search": '<circle cx="13" cy="10" r="5.2"/><path d="M9.2 13.8L5 18.5"/>',
     "git": '<circle cx="7.5" cy="6.5" r="2"/><circle cx="7.5" cy="17.5" r="2"/>'
            '<circle cx="16.5" cy="9" r="2"/><path d="M7.5 8.5v7M9 15.5c4-1 7.5-2 7.5-4.5"/>',
     "debug": '<path d="M8 5.5l11 6.5-11 6.5z"/>',
-    "ext": '<rect x="5" y="5" width="6" height="6"/><rect x="5" y="13" width="6" height="6"/>'
-           '<rect x="13" y="13" width="6" height="6"/><rect x="14.5" y="3.5" width="6" height="6" transform="rotate(15 17.5 6.5)"/>',
+    "ext": '<rect x="4.5" y="10" width="5.5" height="5.5"/><rect x="10.5" y="10" width="5.5" height="5.5"/>'
+           '<rect x="4.5" y="16" width="5.5" height="5.5"/><rect x="13.5" y="3.5" width="5.5" height="5.5"/>',
     "account": '<circle cx="12" cy="9" r="3.5"/><path d="M5.5 19.5c1.5-4 11.5-4 13 0"/>',
-    "gear": '<circle cx="12" cy="12" r="3"/><path d="M12 7V4.5M12 19.5V17M17 12h2.5M4.5 12H7'
-            'M15.5 8.5l1.8-1.8M6.7 17.3l1.8-1.8M15.5 15.5l1.8 1.8M6.7 6.7l1.8 1.8"/>',
+    "gear": '<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="6.8"/>'
+            '<path d="M12 5.2V3.4M12 20.6v-1.8M18.8 12h-1.8M7 12H5.2M16.8 7.2l1.3-1.3M5.9 18.1l1.3-1.3'
+            'M16.8 16.8l1.3 1.3M5.9 5.9l1.3 1.3"/>',
 }
 def icon(name):
     return ('<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
@@ -167,44 +168,48 @@ def icon(name):
 CSS = """
 * { box-sizing:border-box; margin:0; padding:0; }
 html,body { height:100%%; }
-body { background:#1e1e1e; font-family:%(ui)s; -webkit-font-smoothing:antialiased; }
-.win { width:100%%; height:100%%; display:flex; flex-direction:column; background:#1e1e1e; overflow:hidden; }
+body { background:#1f1f1f; font-family:%(ui)s; -webkit-font-smoothing:antialiased; }
+.win { width:100%%; height:100%%; display:flex; flex-direction:column; background:#1f1f1f; overflow:hidden; }
 
-.tb { height:32px; flex:0 0 32px; background:#3c3c3c; color:#cccccc; font-size:12px;
-      display:flex; align-items:center; position:relative; }
+.tb { height:32px; flex:0 0 32px; background:#181818; color:#cccccc; font-size:12px;
+      display:flex; align-items:center; border-bottom:1px solid #2b2b2b; }
 .tb .logo { margin:0 4px 0 10px; }
 .tb .menu { padding:0 8px; }
 .tb .title { flex:1 1 auto; text-align:center; white-space:nowrap;
              overflow:hidden; text-overflow:ellipsis; padding:0 12px; }
-.tb .ctrls { margin-left:auto; display:flex; height:100%%; }
-.tb .ctrl { width:46px; display:flex; align-items:center; justify-content:center;
-            font-size:13px; font-family:%(ui)s; }
+.tb .lctl { display:flex; gap:13px; align-items:center; margin-right:6px; }
+.tb .lctl svg { stroke:#cccccc; opacity:.85; }
+.tb .ctrls { display:flex; height:100%%; }
+.tb .ctrl { width:46px; display:flex; align-items:center; justify-content:center; }
 .tb .ctrl svg { stroke:#cccccc; stroke-width:1; fill:none; }
 
-.tabs { height:35px; flex:0 0 35px; background:#252526; display:flex; }
-.tab { background:#1e1e1e; color:#ffffff; font-size:13px; padding:0 10px;
-       display:flex; align-items:center; gap:6px; }
+.tabs { height:35px; flex:0 0 35px; background:#181818; display:flex; align-items:stretch; }
+.tab { background:#1f1f1f; color:#ffffff; font-size:13px; padding:0 10px;
+       display:flex; align-items:center; gap:6px; border-top:1px solid #0078d4;
+       border-right:1px solid #2b2b2b; }
 .tab .x { color:#8a8a8a; margin-left:8px; font-size:14px; }
+.tabacts { margin-left:auto; display:flex; gap:14px; align-items:center; padding:0 12px; }
+.tabacts svg { stroke:#cccccc; opacity:.8; }
 .pyicon { width:13px; height:13px; border-radius:2px; flex:0 0 13px;
           background:linear-gradient(135deg,#3c78aa 50%%,#ffd845 50%%); }
 
-.crumbs { height:22px; flex:0 0 22px; background:#1e1e1e; color:#a9a9a9; font-size:11.5px;
+.crumbs { height:22px; flex:0 0 22px; background:#1f1f1f; color:#a9a9a9; font-size:11.5px;
           display:flex; align-items:center; gap:5px; padding-left:14px; }
 
 .main { flex:1 1 auto; display:flex; min-height:0; }
 .edwrap, .minimap { min-height:0; }
-.abar { width:48px; flex:0 0 48px; background:#333333; display:flex; flex-direction:column;
-        align-items:center; padding:6px 0; gap:14px; }
+.abar { width:48px; flex:0 0 48px; background:#181818; display:flex; flex-direction:column;
+        align-items:center; padding:6px 0; gap:14px; border-right:1px solid #2b2b2b; }
 .abar .grow { flex:1 1 auto; }
 
 .edwrap { flex:1 1 auto; display:flex; min-width:0; }
-.gut { color:#858585; text-align:right; width:56px; flex:0 0 56px; padding-right:18px;
-       font-family:%(mono)s; font-size:13px; line-height:%(el)dpx; white-space:pre; }
-.gut .cur { color:#c6c6c6; }
-.codearea { flex:1 1 auto; font-family:%(mono)s; font-size:13px; line-height:%(el)dpx;
+.gut { color:#6e7681; text-align:right; width:56px; flex:0 0 56px; padding-right:18px;
+       font-family:%(mono)s; font-size:14px; line-height:%(el)dpx; white-space:pre; }
+.gut .cur { color:#cccccc; }
+.codearea { flex:1 1 auto; font-family:%(mono)s; font-size:14px; line-height:%(el)dpx;
             color:#d4d4d4; min-width:0; }
 .line { white-space:pre; position:relative; height:%(el)dpx; }
-.line.cur { background:#ffffff0a; outline:1px solid #282828; }
+.line.cur { background:#ffffff0a; }
 .guide { position:absolute; left:0; top:0; bottom:0;
          background:repeating-linear-gradient(90deg,#404040 0 1px,transparent 1px 4ch); }
 .caret { display:inline-block; width:2px; height:17px; background:#aeafad;
@@ -212,27 +217,28 @@ body { background:#1e1e1e; font-family:%(ui)s; -webkit-font-smoothing:antialiase
 .t-com{color:#6a9955;} .t-str{color:#ce9178;} .t-num{color:#b5cea8;}
 .t-ctl{color:#c586c0;} .t-kw{color:#569cd6;} .t-fn{color:#dcdcaa;} .t-var{color:#9cdcfe;}
 
-.minimap { width:88px; flex:0 0 88px; position:relative; overflow:hidden; background:#1e1e1e; }
+.minimap { width:88px; flex:0 0 88px; position:relative; overflow:hidden; background:#1f1f1f; }
 .mm-inner { transform:scale(0.18); transform-origin:0 0; width:556%%;
-            font-family:%(mono)s; font-size:13px; line-height:%(el)dpx; color:#d4d4d4; }
+            font-family:%(mono)s; font-size:14px; line-height:%(el)dpx; color:#d4d4d4; }
 .mm-slider { position:absolute; left:0; right:0; background:#ffffff12; }
 
-.sb { height:22px; flex:0 0 22px; background:#007acc; color:#ffffff; font-size:11.5px;
-      display:flex; align-items:center; padding:0 10px; gap:14px; }
+.sb { height:22px; flex:0 0 22px; background:#181818; color:#cccccc; font-size:11.5px;
+      display:flex; align-items:center; padding:0 10px; gap:14px;
+      border-top:1px solid #2b2b2b; }
 .sb .right { margin-left:auto; display:flex; gap:14px; align-items:center; }
 
-.ptabs { height:35px; flex:0 0 35px; background:#1e1e1e; display:flex; align-items:center;
+.ptabs { height:35px; flex:0 0 35px; background:#181818; display:flex; align-items:center;
          gap:16px; padding:0 14px; font-size:11px; color:#8a8a8a; letter-spacing:.3px;
-         border-bottom:1px solid #303031; }
+         border-bottom:1px solid #2b2b2b; }
 .ptabs .on { color:#e7e7e7; border-bottom:1px solid #e7e7e7; padding:10px 0 9px; }
 .ptabs .right { margin-left:auto; display:flex; gap:10px; align-items:center;
                 color:#cccccc; font-size:12px; }
 .ptabs .shellname { font-size:11.5px; color:#cccccc; }
-.term { flex:1 1 auto; padding:8px 14px 10px; }
-.term pre { font-family:%(mono)s; font-size:12px; line-height:%(tm)dpx; color:#cccccc;
+.term { flex:1 1 auto; padding:8px 14px 10px; background:#1f1f1f; }
+.term pre { font-family:%(mono)s; font-size:14px; line-height:%(tm)dpx; color:#cccccc;
             white-space:pre; }
 .ps-cmd { color:#e5e510; }
-.block-caret { display:inline-block; width:7px; height:14px; background:#cccccc;
+.block-caret { display:inline-block; width:8px; height:16px; background:#cccccc;
                vertical-align:text-bottom; }
 """ % {"ui": UI, "mono": MONO, "el": ED_LINE, "tm": TM_LINE}
 
@@ -251,6 +257,17 @@ def shot(page_html, width, height, out_png):
 
 
 def titlebar(fname):
+    lctl = (
+        '<div class="lctl">'
+        '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke-width="1.1">'
+        '<rect x="1.5" y="2.5" width="13" height="11" rx="1"/>'
+        '<path d="M6 2.5v11" fill="none"/><rect x="1.5" y="2.5" width="4.5" height="11" fill="#cccccc" opacity=".55" stroke="none"/></svg>'
+        '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke-width="1.1">'
+        '<rect x="1.5" y="2.5" width="13" height="11" rx="1"/>'
+        '<rect x="1.5" y="9.5" width="13" height="4" fill="#cccccc" opacity=".55" stroke="none"/></svg>'
+        '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke-width="1.1">'
+        '<rect x="1.5" y="2.5" width="13" height="11" rx="1"/><path d="M10 2.5v11"/></svg>'
+        '</div>')
     ctrl = ('<div class="ctrls"><div class="ctrl"><svg width="10" height="10">'
             '<path d="M0 5h10"/></svg></div><div class="ctrl"><svg width="10" height="10">'
             '<rect x="0.5" y="0.5" width="9" height="9"/></svg></div>'
@@ -262,7 +279,7 @@ def titlebar(fname):
     menus = "".join('<span class="menu">%s</span>' % m for m in
                     ["File", "Edit", "Selection", "View", "Go", "Run", "Terminal", "Help"])
     return ('<div class="tb">%s%s<span class="title">%s - %s - Visual Studio Code</span>%s</div>'
-            % (logo, menus, html.escape(fname), html.escape(WORKSPACE), ctrl))
+            % (logo, menus, html.escape(fname), html.escape(WORKSPACE), lctl + ctrl))
 
 
 def editor_shot(fname, code, first, last, cursor_line, cur_col, out_png, pad=0):
@@ -278,7 +295,8 @@ def editor_shot(fname, code, first, last, cursor_line, cur_col, out_png, pad=0):
     mm_top = (first - 1) * ED_LINE * 0.18
     mm_h = rows * ED_LINE * 0.18
     page = """<div class="win">%s
-<div class="tabs"><div class="tab"><span class="pyicon"></span>%s<span class="x">&#10005;</span></div></div>
+<div class="tabs"><div class="tab"><span class="pyicon"></span>%s<span class="x">&#10005;</span></div>
+<div class="tabacts"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke-width="1.1"><rect x="1.5" y="2.5" width="13" height="11" rx="1"/><path d="M8 2.5v11"/></svg><svg width="15" height="15" viewBox="0 0 16 16" fill="#cccccc" stroke="none"><circle cx="3" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="13" cy="8" r="1.2"/></svg></div></div>
 <div class="crumbs"><span class="pyicon" style="width:11px;height:11px"></span>%s</div>
 <div class="main">
   <div class="abar">%s%s%s%s%s<div class="grow"></div>%s%s</div>

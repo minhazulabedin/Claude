@@ -38,7 +38,7 @@ python3 build_submission_pdf.py
 ```
 
 The screenshots are rendered by headless Chromium as a complete VS Code
-(Dark+) window — title bar and menus, activity bar, breadcrumbs, minimap,
+window (Dark Modern, the current default theme) — title bar and menus, activity bar, breadcrumbs, minimap,
 indent guides, bracket-pair colours, cursor and status bar, in Cascadia
 Mono — not captured from a real machine. The code and console output in
 them are real; the window chrome is cosmetic. The generated PDF carries
