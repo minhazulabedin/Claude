@@ -12,24 +12,29 @@ Poster for the World Mental Health Day 2026 poster competition at IUB.
 | `poster-a2-300dpi.png` | Print-ready raster, 4962 × 7019 px (300 dpi at A2) |
 | `poster-a2.pdf` | Print-ready vector PDF at true A2 size (420 × 594 mm) |
 
-## Design
+## Layout (reading order, top to bottom)
 
-- **One clear message:** listening to lived experience leads to real change (slogan: "Listen to the voice, not the label.")
-- **Central visual:** two detailed profile silhouettes face each other — the speaker's tangled thoughts become a flowing line into a heart-shaped speech bubble carrying a voice waveform; the listener holds a heart in mind; ripples, butterflies and rising hearts spread to a diverse community (seven varied figures, including a child) standing on common ground with corner foliage.
-- **Decorative system:** double frame with corner diamonds, ornamental rules with diamond glyphs, folded-ribbon slogan banner, swash underline, dotted-path flow with numbered double-ring medallions, oversized quote marks in the CTA band, sparkle accents, dot-grid texture patches, and soft background arcs and tint blobs.
-- **Flow band:** "From being heard to real change" — Listen → Value → Include → Change medallions with icons, numbers and short captions.
-- **Call to action:** "Listen without judgement — and include people in the decisions that affect them."
-- **Colours:** deep teal `#12626B` / ink teal `#0E3A40`, coral `#E0684B` / deep coral `#B5472E`, amber `#E89A3C` / gold `#C9822F` on warm ivory `#FAF6EF`; dark ink `#1E2A2B` for text (three hue families used consistently).
-- **Fonts:** Fraunces (display, incl. italic) + Work Sans (supporting) — two families, loaded from Google Fonts.
+1. **Theme** — the 2026 theme line, written exactly, as the main title, with the event kicker (IUB · World Mental Health Day · 10 October 2026).
+2. **Slogan** — "Listen to the voice, not the label." on a folded ribbon.
+3. **Central visual** — a speaker's tangled inner story becomes a voice inside a glowing heart-shaped speech bubble; a listener receives it with a heart in mind; between them a diverse community stands on common ground (peers with an arm around each other, a wheelchair user, a child, an elder, a person raising a hand to take part) while hearts and butterflies rise.
+4. **Where inclusion happens** — Families · Universities · Workplaces · Communities.
+5. **What "lived experience" means** — five speech bubbles: living with a condition, seeking & receiving care, recovering, supporting someone, facing barriers to help.
+6. **From being heard to real change** — Before → Listen → Value → Include → Change, grouped under the four domains (Problem · Voice · Action · Change), with Voice marked as the poster's focus. Captions carry stigma/exclusion, listening without judgement, lived experience as expertise, "Nothing about us, without us", and dignity / better support / less stigma. The path shifts from grey (before) through teal to amber (change).
+7. **Call to action** — "Listen without judgement — and include people in the decisions that affect them." plus four actions: offer peer support, ask what they need (person-centred care), respect privacy, challenge stigma.
+8. **Respect line** — "Every story is different — share with consent, listen with respect."
+9. **Footer** — #RealVoicesRealChange · Poster Exhibition · IUB · 13 October 2026.
 
 ## Spec compliance
 
-- A2 portrait, 420 × 594 mm, ≥300 dpi output
-- Main title/theme: 88 px = 66 pt bold (spec 48–72 pt)
-- Slogan: 62 px = 46.5 pt (spec 36–48 pt)
-- Section headings: 42 px = 31.5 pt (spec 28–36 pt)
-- Supporting text: ≥27 px = ≥20 pt (spec 20–24 pt minimum)
-- ~60–70% visual, 2 font families, 3 accent colours + neutrals, strong contrast, single dominant visual
+- A2 portrait, 420 × 594 mm, 300 dpi output
+- Main title/theme: 92 px ≈ 69 pt bold (spec 48–72 pt)
+- Slogan: 50 px ≈ 37.5 pt (spec 36–48 pt)
+- Section headings: 40 px = 30 pt (spec 28–36 pt)
+- Supporting text: ≥ 27 px ≈ 20 pt everywhere (spec 20–24 pt minimum)
+- Two font families: Fraunces (display) + Work Sans (text)
+- Colours: teal `#12626B`, coral `#E0684B`, amber `#E89A3C` on warm ivory `#FAF6EF` (with darker/lighter tints of the same hues and a neutral grey for the "before" state)
+- One dominant visual; icons, speech bubbles and a before → voice → action → change sequence as infographics
+- Dignified, non-identifiable figures; no distressing imagery
 
 ## Regenerating the print files
 
