@@ -12,29 +12,40 @@ Poster for the World Mental Health Day 2026 poster competition at IUB.
 | `poster-a2-300dpi.png` | Print-ready raster, 4962 × 7019 px (300 dpi at A2) |
 | `poster-a2.pdf` | Print-ready vector PDF at true A2 size (420 × 594 mm) |
 
-## Layout (reading order, top to bottom)
+## Design approach
 
-1. **Theme** — the 2026 theme line, written exactly, as the main title, with the event kicker (IUB · World Mental Health Day · 10 October 2026).
-2. **Slogan** — "Listen to the voice, not the label." on a folded ribbon.
-3. **Central visual** — a speaker's tangled inner story becomes a voice inside a glowing heart-shaped speech bubble; a listener receives it with a heart in mind; between them a diverse community stands on common ground (peers with an arm around each other, a wheelchair user, a child, an elder, a person raising a hand to take part) while hearts and butterflies rise.
-4. **Where inclusion happens** — Families · Universities · Workplaces · Communities.
-5. **What "lived experience" means** — five speech bubbles: living with a condition, seeking & receiving care, recovering, supporting someone, facing barriers to help.
-6. **From being heard to real change** — Before → Listen → Value → Include → Change, grouped under the four domains (Problem · Voice · Action · Change), with Voice marked as the poster's focus. Captions carry stigma/exclusion, listening without judgement, lived experience as expertise, "Nothing about us, without us", and dignity / better support / less stigma. The path shifts from grey (before) through teal to amber (change).
-7. **Call to action** — "Listen without judgement — and include people in the decisions that affect them." plus four actions: offer peer support, ask what they need (person-centred care), respect privacy, challenge stigma.
-8. **Respect line** — "Every story is different — share with consent, listen with respect."
-9. **Footer** — #RealVoicesRealChange · Poster Exhibition · IUB · 13 October 2026.
+Built against the brief's own final checklist: one message, one domain (Voice), minimal text,
+one dominant visual. The illustration carries the content instead of text panels.
+
+- **Theme** — the 2026 theme line, written exactly, as the main title (≈69 pt bold).
+- **Slogan** — "Listen to the voice, not the label." on a ribbon (≈37.5 pt).
+- **Central visual (~40% of the sheet)** — a speaker's tangled inner story becomes a voice inside a
+  heart-shaped speech bubble; a listener receives it with a heart in mind. In front, a diverse
+  community stands together, and five speech bubbles rise from it naming the lived experiences in the
+  brief: living with a condition, seeking care, recovering, supporting someone, facing barriers.
+  Places are shown through props rather than words: a parent holding a child's hand (family), a
+  graduation cap (university), a work lanyard (workplace), the crowd itself (community). Peer support
+  (an arm around a friend), a wheelchair user, an elder and a raised hand (taking part) show inclusion.
+- **Journey** — Before → Listen → Value → Include → Change, with "Voice · our focus" marking the
+  chosen domain. The path runs from muted ink (stigma and silence) through teal to amber (change).
+- **Call to action** — "Listen without judgement. Include people in decisions that affect them."
+  plus two actions: offer peer support, challenge stigma.
 
 ## Spec compliance
 
 - A2 portrait, 420 × 594 mm, 300 dpi output
-- Main title/theme: 92 px ≈ 69 pt bold (spec 48–72 pt)
-- Slogan: 50 px ≈ 37.5 pt (spec 36–48 pt)
-- Section headings: 40 px = 30 pt (spec 28–36 pt)
-- Supporting text: ≥ 27 px ≈ 20 pt everywhere (spec 20–24 pt minimum)
-- Two font families: Fraunces (display) + Work Sans (text)
-- Colours: teal `#12626B`, coral `#E0684B`, amber `#E89A3C` on warm ivory `#FAF6EF` (with darker/lighter tints of the same hues and a neutral grey for the "before" state)
-- One dominant visual; icons, speech bubbles and a before → voice → action → change sequence as infographics
+- Main title 92 px ≈ 69 pt bold (48–72); slogan 50 px ≈ 37.5 pt (36–48); headings 40 px = 30 pt (28–36);
+  all supporting text ≥ 27 px ≈ 20 pt
+- 75 words in total; roughly 65–70% visual
+- Two font families: Fraunces + Work Sans
+- Strict palette: teal `#12626B`, coral `#E0684B`, amber `#E89A3C`, plus ink `#1E2A2B` and ivory `#FAF6EF`
 - Dignified, non-identifiable figures; no distressing imagery
+
+## Before submitting
+
+- Print an A4 test copy (teal often prints darker) and check it in greyscale.
+- View it from about 3 metres and as a thumbnail — the title, slogan and scene should read in seconds.
+- Add team names (up to 3) if the competition rules ask for them on the poster.
 
 ## Regenerating the print files
 
