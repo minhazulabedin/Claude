@@ -1,0 +1,1964 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WMHD Poster Workbench</title>
+<meta name="description" content="Set up and check an A2, 300 dpi poster for the IUB World Mental Health Day 2026 poster competition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Lexend:wght@400;700&family=Source+Sans+3:wght@400;700&family=Nunito+Sans:wght@400;700&family=Work+Sans:wght@400;700&family=Poppins:wght@400;700&family=Montserrat:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Roboto+Slab:wght@400;700&family=Hind+Siliguri:wght@400;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --ground: #E8EDEA;
+    --surface: #F8FAF9;
+    --surface-2: #EEF2F0;
+    --ink: #16201C;
+    --muted: #55645E;
+    --line: #D0D9D4;
+    --line-strong: #AAB8B1;
+    --accent: #22527A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DAE5EF;
+    --pass: #1F7A3A;
+    --pass-soft: #DCEFE2;
+    --check: #8F5400;
+    --check-soft: #F5E6CC;
+    --fix: #B3261E;
+    --fix-soft: #F7DCD8;
+    --todo: #55645E;
+    --todo-soft: #E1E8E4;
+    --mat: #D9E1DC;
+    --mat-line: rgba(22, 32, 28, 0.07);
+    --paper-shadow: 0 1px 2px rgba(22, 32, 28, 0.14), 0 22px 44px -16px rgba(22, 32, 28, 0.35);
+    --ui: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1412;
+      --surface: #151D1A;
+      --surface-2: #1B2521;
+      --ink: #E2EAE6;
+      --muted: #98A7A0;
+      --line: #27322E;
+      --line-strong: #3C4A45;
+      --accent: #8FB8DE;
+      --accent-ink: #0D1824;
+      --accent-soft: #1D2D3C;
+      --pass: #6CC487;
+      --pass-soft: #15301F;
+      --check: #E3A650;
+      --check-soft: #33260F;
+      --fix: #F28B82;
+      --fix-soft: #3B1916;
+      --todo: #98A7A0;
+      --todo-soft: #222C28;
+      --mat: #111815;
+      --mat-line: rgba(226, 234, 230, 0.05);
+      --paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 44px -16px rgba(0, 0, 0, 0.8);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1412;
+    --surface: #151D1A;
+    --surface-2: #1B2521;
+    --ink: #E2EAE6;
+    --muted: #98A7A0;
+    --line: #27322E;
+    --line-strong: #3C4A45;
+    --accent: #8FB8DE;
+    --accent-ink: #0D1824;
+    --accent-soft: #1D2D3C;
+    --pass: #6CC487;
+    --pass-soft: #15301F;
+    --check: #E3A650;
+    --check-soft: #33260F;
+    --fix: #F28B82;
+    --fix-soft: #3B1916;
+    --todo: #98A7A0;
+    --todo-soft: #222C28;
+    --mat: #111815;
+    --mat-line: rgba(226, 234, 230, 0.05);
+    --paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 44px -16px rgba(0, 0, 0, 0.8);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--ground);
+    color: var(--ink);
+    font: 15px/1.45 var(--ui);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .top {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand svg { flex: none; }
+  .brand h1 { font-size: 18px; line-height: 1.2; letter-spacing: -0.01em; }
+  .brand p { font: 12px/1.35 var(--mono); color: var(--muted); }
+  .spacer { flex: 1; }
+  .due {
+    font: 500 12px/1 var(--mono);
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--todo-soft);
+    color: var(--todo);
+    white-space: nowrap;
+  }
+  .due.pass { background: var(--pass-soft); color: var(--pass); }
+  .due.check { background: var(--check-soft); color: var(--check); }
+  .due.fix { background: var(--fix-soft); color: var(--fix); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn[disabled] { opacity: 0.6; cursor: progress; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn .fmt { font: 500 11px/1 var(--mono); opacity: 0.8; }
+  .btn.small { padding: 6px 10px; font-size: 13px; }
+  .btn.danger { color: var(--fix); }
+
+  /* ---------- three-pane app ---------- */
+  .app {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr) 330px;
+    grid-template-areas: "controls stage checks";
+  }
+  .controls, .checks { min-height: 0; overflow-y: auto; background: var(--surface); }
+  .controls { grid-area: controls; border-right: 1px solid var(--line); }
+  .checks { grid-area: checks; border-left: 1px solid var(--line); }
+  .stage {
+    grid-area: stage;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--mat);
+    background-image:
+      linear-gradient(var(--mat-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ---------- stage ---------- */
+  .stage-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 16px 0;
+  }
+  .spec { font: 12px/1.3 var(--mono); color: var(--muted); }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .toggle[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .mat {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+  }
+  #poster {
+    display: block;
+    max-width: 100%;
+    background: #fff;
+    box-shadow: var(--paper-shadow);
+    transition: filter 0.25s ease;
+  }
+  .squint #poster { filter: blur(3px); }
+  .mat-note { font: 12px/1.4 var(--mono); color: var(--muted); text-align: center; max-width: 52ch; }
+
+  /* ---------- controls ---------- */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 0;
+    padding: 6px 8px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1 1 auto;
+    border: 0;
+    background: none;
+    padding: 10px 3px 9px;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .tab .num { font: 500 11px/1 var(--mono); margin-right: 3px; opacity: 0.75; }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .panel { display: grid; gap: 18px; padding: 16px 16px 28px; }
+  .intro { color: var(--muted); font-size: 14px; }
+  .intro strong { color: var(--ink); }
+  .sub {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field { display: grid; gap: 6px; min-width: 0; }
+  .label { font-weight: 700; font-size: 14px; }
+  .label .opt { font-weight: 400; color: var(--muted); }
+  .hint { font: 12px/1.45 var(--mono); color: var(--muted); }
+  .hint.warn { color: var(--check); }
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  input[type="text"]:focus-visible, textarea:focus-visible, select:focus-visible { outline-offset: 0; border-color: var(--accent); }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .check-line { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+  .check-line input { margin: 3px 0 0; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+  .locked {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; width: fit-content; max-width: 100%; }
+  .seg label { position: relative; cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg span { display: block; padding: 7px 12px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .seg label + label span { border-left: 1px solid var(--line-strong); }
+  .seg input:checked + span { background: var(--accent); color: var(--accent-ink); }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .chips { display: grid; gap: 6px; }
+  .chip-opt { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+  .chip-opt input { margin: 3px 0 0; accent-color: var(--accent); }
+  .chip-opt b { font-size: 14px; }
+  .chip-opt small { grid-column: 2; color: var(--muted); font-size: 13px; }
+  .chip-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .flowline { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font: 12px/1.3 var(--mono); color: var(--muted); }
+  .flowline b { color: var(--ink); font-family: var(--ui); font-size: 13px; }
+  .step { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .step .label { font-size: 13px; }
+  .range-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .range-head output { font: 12px/1.3 var(--mono); color: var(--muted); text-align: right; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+  .colour { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+  .colour input[type="color"] { width: 46px; height: 36px; padding: 2px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); cursor: pointer; }
+  .colour input[type="color"]:disabled { opacity: 0.35; cursor: not-allowed; }
+  .colour .nm { font-weight: 700; font-size: 14px; }
+  .colour .hex { display: block; font: 12px/1.3 var(--mono); color: var(--muted); text-transform: uppercase; }
+  .ratio { font: 500 12px/1 var(--mono); padding: 5px 7px; border-radius: 6px; white-space: nowrap; }
+  .ratio.pass { background: var(--pass-soft); color: var(--pass); }
+  .ratio.check { background: var(--check-soft); color: var(--check); }
+  .ratio.fix { background: var(--fix-soft); color: var(--fix); }
+  .drop {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    padding: 18px 14px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 10px;
+    background: var(--surface-2);
+    text-align: center;
+  }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop p { font-size: 13px; color: var(--muted); }
+  .file-btn { position: relative; overflow: hidden; }
+  .file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+  .file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .imginfo { display: grid; gap: 4px; font: 12px/1.45 var(--mono); color: var(--muted); word-break: break-word; }
+  .imginfo b { color: var(--ink); font-family: var(--ui); font-size: 14px; }
+  .icons { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .icon-slot { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
+  .icon-slot .state { font: 12px/1.3 var(--mono); color: var(--muted); word-break: break-word; }
+  .icon-slot .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .order { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .order li { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+  .order .n { font: 500 12px/1 var(--mono); color: var(--muted); width: 1.2em; }
+  .order .nm { flex: 1; font-weight: 700; font-size: 14px; }
+  .order .nm small { font-weight: 400; color: var(--muted); }
+  .icon-btn { width: 32px; height: 32px; display: inline-grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); cursor: pointer; font-size: 15px; line-height: 1; }
+  .icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* ---------- checks ---------- */
+  .checks-head { position: sticky; top: 0; z-index: 1; padding: 16px; background: var(--surface); border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+  .checks-head h2 { font-size: 16px; }
+  .checks-head p { font-size: 13px; color: var(--muted); }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font: 500 11px/1.1 var(--mono);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pill.pass { background: var(--pass-soft); color: var(--pass); }
+  .pill.check { background: var(--check-soft); color: var(--check); }
+  .pill.fix { background: var(--fix-soft); color: var(--fix); }
+  .pill.todo { background: var(--todo-soft); color: var(--todo); }
+  .group { padding: 14px 16px 6px; }
+  .group h3 { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; }
+  .item { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
+  .item .pill { width: 64px; }
+  .item .t { font-weight: 700; font-size: 14px; line-height: 1.3; }
+  .item .d { font-size: 13px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+  .item .d em { font-style: normal; color: var(--ink); }
+  .item label.check-line { font-weight: 700; }
+  .meter { position: relative; height: 8px; margin: 10px 0 4px; border-radius: 4px; background: var(--todo-soft); }
+  .meter .zone { position: absolute; top: 0; bottom: 0; left: 60%; width: 10%; background: var(--pass-soft); border-inline: 1.5px solid var(--pass); }
+  .meter .mark { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--ink); transform: translateX(-50%); }
+  .meter-scale { display: flex; justify-content: space-between; font: 11px/1.2 var(--mono); color: var(--muted); }
+  .sources { padding: 14px 16px 24px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+  .sources a { color: var(--accent); }
+
+  /* ---------- toast ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 10;
+    max-width: calc(100% - 32px);
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--ground);
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* ---------- narrower screens ---------- */
+  @media (max-width: 1180px) {
+    html, body { height: auto; }
+    body { display: block; }
+    .app {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "stage stage" "controls checks";
+    }
+    .controls, .checks { overflow: visible; }
+    .controls { border-right: 1px solid var(--line); border-top: 1px solid var(--line); }
+    .checks { border-left: 0; border-top: 1px solid var(--line); }
+    .checks-head { position: static; }
+  }
+  @media (max-width: 760px) {
+    .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "controls" "checks"; }
+    .controls { border-right: 0; }
+    .top .spacer { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #poster { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
+      <path d="M10 35 L19.6 18.5 C22.5 13.5 20.5 6 15 6 C9.5 6 7.5 13.5 10.4 18.5 L20 35" fill="none" stroke="#3E9B5B" stroke-width="4" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>WMHD Poster Workbench</h1>
+      <p>IUB · World Mental Health Day 2026 · A2 poster</p>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <span class="due" id="due">Submit by 6 Oct 2026</span>
+  <div class="actions">
+    <button class="btn primary" type="button" id="exportPng">Export <span class="fmt">PNG · 300 dpi</span></button>
+    <button class="btn primary" type="button" id="exportPdf">Export <span class="fmt">PDF · A2</span></button>
+    <button class="btn" type="button" id="saveProject">Save project</button>
+    <span class="btn file-btn">Open project<input type="file" id="openProject" accept="application/json,.json" aria-label="Open a saved project file"></span>
+  </div>
+</header>
+
+<main class="app">
+  <!-- ======================= CONTROLS ======================= -->
+  <section class="controls" aria-label="Poster settings">
+    <div class="tabs" role="tablist" aria-label="Steps">
+      <button class="tab" role="tab" id="t-focus" aria-controls="p-focus" aria-selected="true"><span class="num">1</span>Focus</button>
+      <button class="tab" role="tab" id="t-words" aria-controls="p-words" aria-selected="false"><span class="num">2</span>Words</button>
+      <button class="tab" role="tab" id="t-visual" aria-controls="p-visual" aria-selected="false"><span class="num">3</span>Visual</button>
+      <button class="tab" role="tab" id="t-style" aria-controls="p-style" aria-selected="false"><span class="num">4</span>Style</button>
+      <button class="tab" role="tab" id="t-layout" aria-controls="p-layout" aria-selected="false"><span class="num">5</span>Layout</button>
+    </div>
+
+    <!-- 1 FOCUS -->
+    <div class="panel" role="tabpanel" id="p-focus" aria-labelledby="t-focus">
+      <p class="intro"><strong>One theme, one clear idea, one strong message.</strong> Decide these before you draw anything. Nothing on this tab is printed.</p>
+      <div class="flowline" aria-label="The theme's flow">
+        <b>Listen</b>→<b>Value their voice</b>→<b>Include them</b>→<b>Create change</b>
+      </div>
+      <label class="field">
+        <span class="label">Your one message</span>
+        <select id="focusMessage" data-bind="focusMessage">
+          <option value="">Choose one…</option>
+        </select>
+      </label>
+      <fieldset class="field" style="border:0;padding:0;margin:0">
+        <legend class="label" style="padding:0;margin-bottom:6px">Your one domain</legend>
+        <div class="chips" id="domainChips"></div>
+      </fieldset>
+      <label class="field">
+        <span class="label">In one sentence: what should a viewer understand, feel or do?</span>
+        <textarea id="takeaway" data-bind="takeaway" rows="3" placeholder="Write it in your own words"></textarea>
+        <span class="hint">If this sentence is hard to write, the poster isn't ready to design yet.</span>
+      </label>
+
+      <h2 class="sub">Team</h2>
+      <p class="intro">Enter individually or as a group of up to 3.</p>
+      <div class="field">
+        <label class="label" for="m0">Member 1</label>
+        <input type="text" id="m0" data-bind="members.0" autocomplete="name">
+      </div>
+      <div class="field">
+        <label class="label" for="m1">Member 2 <span class="opt">(optional)</span></label>
+        <input type="text" id="m1" data-bind="members.1">
+      </div>
+      <div class="field">
+        <label class="label" for="m2">Member 3 <span class="opt">(optional)</span></label>
+        <input type="text" id="m2" data-bind="members.2">
+      </div>
+      <label class="check-line"><input type="checkbox" id="printNames" data-bind="printNames"> Print our names at the bottom of the poster</label>
+
+      <h2 class="sub">Start over</h2>
+      <div><button class="btn small danger" type="button" id="reset">Clear everything</button></div>
+    </div>
+
+    <!-- 2 WORDS -->
+    <div class="panel" role="tabpanel" id="p-words" aria-labelledby="t-words" hidden>
+      <p class="intro">Short phrases and keywords, not paragraphs. Every line below says the size it prints at.</p>
+      <div class="field">
+        <span class="label">Theme line <span class="opt">· main title, can't be edited</span></span>
+        <p class="locked" id="themeText"></p>
+        <div class="seg" role="radiogroup" aria-label="Theme line capitalisation">
+          <label><input type="radio" name="themeStyle" value="iub" data-bind="themeStyle"><span>As in IUB guidelines</span></label>
+          <label><input type="radio" name="themeStyle" value="wfmh" data-bind="themeStyle"><span>As published by WFMH</span></label>
+        </div>
+        <span class="hint" data-hint="title"></span>
+      </div>
+      <div class="field">
+        <label class="label" for="eyebrow">Small label above the theme <span class="opt">(optional)</span></label>
+        <input type="text" id="eyebrow" data-bind="eyebrow">
+        <label class="check-line"><input type="checkbox" id="showEyebrow" data-bind="showEyebrow"> Show this label</label>
+        <span class="hint" data-hint="eyebrow"></span>
+      </div>
+      <div class="field">
+        <label class="label" for="slogan">Your headline or slogan</label>
+        <input type="text" id="slogan" data-bind="slogan" placeholder="Short, original and yours">
+        <span class="hint" data-hint="slogan"></span>
+      </div>
+      <div class="field">
+        <label class="label" for="message">Key message</label>
+        <textarea id="message" data-bind="message" rows="2" placeholder="What should the viewer understand, feel or think?"></textarea>
+        <label class="check-line"><input type="checkbox" id="showMessage" data-bind="showMessage"> Include a key message line</label>
+        <span class="hint" data-hint="message"></span>
+      </div>
+
+      <h2 class="sub">Flow of steps</h2>
+      <label class="check-line"><input type="checkbox" id="showFlow" data-bind="showFlow"> Include a step-by-step flow (for example before → voice → action → change)</label>
+      <div class="panel" id="flowFields" style="padding:0;gap:12px">
+        <div class="field">
+          <span class="label">Number of steps</span>
+          <div class="seg" role="radiogroup" aria-label="Number of steps">
+            <label><input type="radio" name="stepCount" value="2" data-bind="stepCount" data-type="number"><span>2</span></label>
+            <label><input type="radio" name="stepCount" value="3" data-bind="stepCount" data-type="number"><span>3</span></label>
+            <label><input type="radio" name="stepCount" value="4" data-bind="stepCount" data-type="number"><span>4</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="flowTitle">Flow heading <span class="opt">(optional)</span></label>
+          <input type="text" id="flowTitle" data-bind="flowTitle">
+          <span class="hint" data-hint="heading"></span>
+        </div>
+        <div class="step" data-step="0">
+          <label class="label" for="s0h">Step 1</label>
+          <input type="text" id="s0h" data-bind="steps.0.h" placeholder="Heading, one or two words">
+          <input type="text" id="s0c" data-bind="steps.0.c" placeholder="Caption (optional)" aria-label="Step 1 caption">
+        </div>
+        <div class="step" data-step="1">
+          <label class="label" for="s1h">Step 2</label>
+          <input type="text" id="s1h" data-bind="steps.1.h" placeholder="Heading, one or two words">
+          <input type="text" id="s1c" data-bind="steps.1.c" placeholder="Caption (optional)" aria-label="Step 2 caption">
+        </div>
+        <div class="step" data-step="2">
+          <label class="label" for="s2h">Step 3</label>
+          <input type="text" id="s2h" data-bind="steps.2.h" placeholder="Heading, one or two words">
+          <input type="text" id="s2c" data-bind="steps.2.c" placeholder="Caption (optional)" aria-label="Step 3 caption">
+        </div>
+        <div class="step" data-step="3">
+          <label class="label" for="s3h">Step 4</label>
+          <input type="text" id="s3h" data-bind="steps.3.h" placeholder="Heading, one or two words">
+          <input type="text" id="s3c" data-bind="steps.3.c" placeholder="Caption (optional)" aria-label="Step 4 caption">
+        </div>
+        <span class="hint" data-hint="steps"></span>
+      </div>
+
+      <h2 class="sub">Call to action</h2>
+      <div class="field">
+        <label class="label" for="ctaHead">Small label <span class="opt">(optional)</span></label>
+        <input type="text" id="ctaHead" data-bind="ctaHead">
+      </div>
+      <div class="field">
+        <label class="label" for="cta">What should the viewer do?</label>
+        <input type="text" id="cta" data-bind="cta" placeholder="Your call to action">
+        <span class="hint" data-hint="cta"></span>
+      </div>
+
+      <h2 class="sub">Footer</h2>
+      <div class="field">
+        <label class="label" for="footer">Footer line <span class="opt">(optional)</span></label>
+        <input type="text" id="footer" data-bind="footer" placeholder="For example your department">
+        <span class="hint" data-hint="footer"></span>
+      </div>
+    </div>
+
+    <!-- 3 VISUAL -->
+    <div class="panel" role="tabpanel" id="p-visual" aria-labelledby="t-visual" hidden>
+      <p class="intro"><strong>One dominant visual that tells the story.</strong> It must be your own drawing, photo or infographic. Draw it on paper and scan it, or make it in any drawing app, then add it here.</p>
+      <div class="drop" id="drop">
+        <span class="btn file-btn">Choose your visual<input type="file" id="visualFile" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label="Choose your central visual"></span>
+        <p>or drop an image here · PNG, JPG, WebP or SVG</p>
+      </div>
+      <div class="imginfo" id="visualInfo"></div>
+      <div class="field">
+        <span class="label">How it fills its space</span>
+        <div class="seg" role="radiogroup" aria-label="Image fit">
+          <label><input type="radio" name="fit" value="contain" data-bind="fit"><span>Show whole image</span></label>
+          <label><input type="radio" name="fit" value="cover" data-bind="fit"><span>Fill and crop</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="caption">Caption under the visual <span class="opt">(optional)</span></label>
+        <input type="text" id="caption" data-bind="caption">
+        <span class="hint" data-hint="caption"></span>
+      </div>
+
+      <h2 class="sub">Step icons</h2>
+      <p class="intro">Optional. Add your own small drawings for the flow steps. Empty slots print as numbered circles.</p>
+      <div class="icons" id="iconSlots"></div>
+
+      <h2 class="sub">Respect and dignity</h2>
+      <p class="intro">Show people with dignity, never as weak, helpless or dangerous. No graphic or disturbing images. Use a real person's face or story only with their permission.</p>
+    </div>
+
+    <!-- 4 STYLE -->
+    <div class="panel" role="tabpanel" id="p-style" aria-labelledby="t-style" hidden>
+      <p class="intro">At most 2 font families and 2 to 4 colours. The sliders only move within the sizes the guidelines allow.</p>
+      <div class="row2">
+        <label class="field">
+          <span class="label">Heading font</span>
+          <select id="fontHead" data-bind="fontHead"></select>
+        </label>
+        <label class="field">
+          <span class="label">Text font</span>
+          <select id="fontBody" data-bind="fontBody"></select>
+        </label>
+      </div>
+      <span class="hint" id="fontHint"></span>
+
+      <h2 class="sub">Type sizes</h2>
+      <div class="field">
+        <div class="range-head"><label class="label" for="szTitle">Main title / theme <span class="opt">48–72 pt</span></label><output id="o-title" for="szTitle"></output></div>
+        <input type="range" id="szTitle" min="48" max="72" step="1" data-bind="sizes.title" data-type="number">
+      </div>
+      <div class="field">
+        <div class="range-head"><label class="label" for="szSlogan">Slogan <span class="opt">36–48 pt</span></label><output id="o-slogan" for="szSlogan"></output></div>
+        <input type="range" id="szSlogan" min="36" max="48" step="1" data-bind="sizes.slogan" data-type="number">
+      </div>
+      <div class="field">
+        <div class="range-head"><label class="label" for="szHeading">Section headings <span class="opt">28–36 pt</span></label><output id="o-heading" for="szHeading"></output></div>
+        <input type="range" id="szHeading" min="28" max="36" step="1" data-bind="sizes.heading" data-type="number">
+      </div>
+      <div class="field">
+        <div class="range-head"><label class="label" for="szBody">Supporting text <span class="opt">20–24 pt</span></label><output id="o-body" for="szBody"></output></div>
+        <input type="range" id="szBody" min="20" max="24" step="1" data-bind="sizes.body" data-type="number">
+      </div>
+
+      <h2 class="sub">Colours</h2>
+      <div class="colour">
+        <input type="color" id="cBg" data-bind="colors.bg" aria-label="Background colour">
+        <div><span class="nm">Background</span><span class="hex" id="x-bg"></span></div>
+        <span></span>
+      </div>
+      <div class="colour">
+        <input type="color" id="cInk" data-bind="colors.ink" aria-label="Text colour">
+        <div><span class="nm">Text</span><span class="hex" id="x-ink"></span></div>
+        <span class="ratio" id="r-ink" title="Text on background"></span>
+      </div>
+      <div class="colour">
+        <input type="color" id="cAccent" data-bind="colors.accent" aria-label="Accent colour">
+        <div><span class="nm">Accent</span><span class="hex" id="x-accent"></span></div>
+        <span class="ratio" id="r-accent" title="Accent on background"></span>
+      </div>
+      <div class="colour">
+        <input type="color" id="cAccent2" data-bind="colors.accent2" aria-label="Second accent colour">
+        <div><span class="nm">Second accent</span><span class="hex" id="x-accent2"></span></div>
+        <span class="ratio" id="r-band" title="Call to action text on its band"></span>
+      </div>
+      <label class="check-line"><input type="checkbox" id="useAccent2" data-bind="useAccent2"> Use a second accent for the call to action band</label>
+      <div class="field">
+        <span class="label">Slogan colour</span>
+        <div class="seg" role="radiogroup" aria-label="Slogan colour">
+          <label><input type="radio" name="sloganColor" value="accent" data-bind="sloganColor"><span>Accent</span></label>
+          <label><input type="radio" name="sloganColor" value="ink" data-bind="sloganColor"><span>Text colour</span></label>
+        </div>
+      </div>
+      <span class="hint">Ratios are WCAG contrast. Aim for 7:1 on body text so it reads from a distance.</span>
+    </div>
+
+    <!-- 5 LAYOUT -->
+    <div class="panel" role="tabpanel" id="p-layout" aria-labelledby="t-layout" hidden>
+      <p class="intro">Reading order, top to bottom. Decide what a viewer sees first, second and third. The visual takes whatever space is left.</p>
+      <ol class="order" id="order"></ol>
+      <div class="field">
+        <span class="label">Text alignment</span>
+        <div class="seg" role="radiogroup" aria-label="Text alignment">
+          <label><input type="radio" name="align" value="left" data-bind="align"><span>Left</span></label>
+          <label><input type="radio" name="align" value="center" data-bind="align"><span>Centre</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="range-head"><label class="label" for="margin">Page margin</label><output id="o-margin" for="margin"></output></div>
+        <input type="range" id="margin" min="15" max="35" step="1" data-bind="margin" data-type="number">
+      </div>
+      <div class="field">
+        <div class="range-head"><label class="label" for="gap">Space between parts</label><output id="o-gap" for="gap"></output></div>
+        <input type="range" id="gap" min="8" max="24" step="1" data-bind="gap" data-type="number">
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= STAGE ======================= -->
+  <section class="stage" aria-label="Poster preview">
+    <div class="stage-bar">
+      <span class="spec">A2 portrait · 420 × 594 mm · exports 4961 × 7016 px</span>
+      <span class="spacer"></span>
+      <button class="toggle" type="button" id="guidesBtn" aria-pressed="false">Guides</button>
+      <button class="toggle" type="button" id="squintBtn" aria-pressed="false">Squint test</button>
+    </div>
+    <div class="mat" id="mat">
+      <canvas id="poster" width="420" height="594" role="img" aria-label="Poster preview"></canvas>
+      <p class="mat-note" id="matNote">Dashed boxes are placeholders. They show on screen only and never export.</p>
+    </div>
+  </section>
+
+  <!-- ======================= CHECKS ======================= -->
+  <aside class="checks" aria-label="Submission check">
+    <div class="checks-head">
+      <h2>Submission check</h2>
+      <div class="tally" id="tally"></div>
+      <p>Updates as you work. Checks come from the IUB guidelines.</p>
+    </div>
+    <div id="groups"></div>
+    <div class="group">
+      <h3>Your declarations</h3>
+      <div id="decls"></div>
+    </div>
+    <div class="sources">
+      <span>Theme wording: <a href="https://wmhdofficial.com/" target="_blank" rel="noopener">wmhdofficial.com</a> · <a href="https://wfmh.global/" target="_blank" rel="noopener">WFMH</a></span>
+      <span>Your work stays in this browser until you export or save it.</span>
+    </div>
+  </aside>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================= constants ================= */
+  const PT = 25.4 / 72;                  // mm per point
+  const PAGE = { w: 420, h: 594 };       // A2 portrait, mm
+  const EXPORT_DPI = 300;
+  const THEMES = {
+    iub: 'Lived experiences heard: real voices, real change.',
+    wfmh: 'Lived Experiences Heard: Real Voices, Real Change',
+  };
+  const DEADLINE = new Date('2026-10-06T23:59:59+06:00');
+  const FONTS = [
+    'Atkinson Hyperlegible', 'Lexend', 'Source Sans 3', 'Nunito Sans', 'Work Sans', 'Poppins',
+    'Montserrat', 'Lato', 'Merriweather', 'Lora', 'Roboto Slab', 'Hind Siliguri',
+  ];
+  const MESSAGES = [
+    ['listen', 'Listen to lived experiences'],
+    ['heard-change', 'From being heard to creating change'],
+    ['nothing-about-us', 'Nothing about us without us'],
+    ['stigma', 'Breaking stigma through real voices'],
+    ['peer', 'Peer support'],
+    ['person-centred', 'Person-centred care'],
+    ['community', 'Community support and inclusion'],
+    ['dignity', 'Voice, dignity and choice'],
+    ['own', 'Another message, my own'],
+  ];
+  const DOMAINS = [
+    ['problem', 'Problem', 'Stigma, exclusion, lack of support'],
+    ['voice', 'Voice and experience', 'Lived experiences and perspectives'],
+    ['action', 'Action', 'Listening, inclusion, meaningful engagement'],
+    ['change', 'Positive change', 'Dignity, better support, reduced stigma'],
+  ];
+  const BLOCKS = {
+    theme: 'Theme line',
+    slogan: 'Headline / slogan',
+    visual: 'Central visual',
+    message: 'Key message',
+    flow: 'Flow of steps',
+    cta: 'Call to action',
+  };
+  const LANGUAGE = [
+    { re: /\b(crazy|insane|lunatics?|loony|looney|nutcases?|psychos?|maniacs?|deranged|retard(ed)?|schizo|mental cases?|attention[- ]seek(ing|er|ers))\b/gi, level: 'fix', alt: 'Stigmatising. Describe the experience instead.' },
+    { re: /\bcommit(s|ted)? suicide\b/gi, level: 'fix', alt: 'Say "died by suicide".' },
+    { re: /\bsnap out of it\b/gi, level: 'fix', alt: 'Dismissive of what people go through.' },
+    { re: /\b(mad|nuts)\b/gi, level: 'check', alt: 'Often used as a slur. Check the meaning.' },
+    { re: /\bsuffer(s|ed|ing)? from\b/gi, level: 'check', alt: 'Try "living with" or "experiencing".' },
+    { re: /\bvictims?\b/gi, level: 'check', alt: 'Try "person who experienced…".' },
+    { re: /\bthe mentally ill\b/gi, level: 'check', alt: 'Try "people with mental health conditions".' },
+    { re: /\bnormal (people|person)\b/gi, level: 'check', alt: 'Try "people without a mental health condition".' },
+    { re: /\b(weak|helpless|hopeless|broken|dangerous|violent|unstable)\b/gi, level: 'check', alt: 'Make sure this doesn’t describe people as weak, helpless or dangerous.' },
+  ];
+  const DEFAULTS = {
+    focusMessage: '', focusDomain: '', takeaway: '',
+    members: ['', '', ''], printNames: true,
+    themeStyle: 'iub', eyebrow: 'World Mental Health Day 2026', showEyebrow: true,
+    slogan: '', message: '', showMessage: true,
+    showFlow: true, stepCount: 4, flowTitle: '',
+    steps: [{ h: '', c: '' }, { h: '', c: '' }, { h: '', c: '' }, { h: '', c: '' }],
+    ctaHead: '', cta: '', footer: '',
+    caption: '', fit: 'contain',
+    fontHead: 'Lexend', fontBody: 'Source Sans 3',
+    sizes: { title: 60, slogan: 42, heading: 30, body: 22 },
+    colors: { bg: '#ffffff', ink: '#1b1f24', accent: '#2f5d8a', accent2: '#f2c14e' },
+    useAccent2: false, sloganColor: 'accent',
+    order: ['theme', 'slogan', 'visual', 'message', 'flow', 'cta'],
+    align: 'left', margin: 20, gap: 14,
+    guides: false,
+    decl: { own: false, consent: false, graphic: false, represent: false },
+  };
+  const DECLS = [
+    ['own', 'The concept, illustration, infographic and design are our own work.'],
+    ['consent', 'Any real person’s story or photo is used with their permission, or none is used.'],
+    ['graphic', 'No graphic or disturbing images. People are shown with dignity.'],
+    ['represent', 'The poster doesn’t present one person’s experience as everyone’s.'],
+  ];
+  const STATE_KEY = 'wmhd-poster-v1';
+  const TAB_KEY = 'wmhd-poster-tab';
+
+  /* ================= helpers ================= */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const words = (s) => (String(s || '').trim().match(/\S+/g) || []).length;
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+  const setPath = (o, p, v) => { const ks = p.split('.'); let a = o; for (let i = 0; i < ks.length - 1; i++) a = a[ks[i]]; a[ks[ks.length - 1]] = v; };
+  const pxAt300 = (mm) => Math.round((mm / 25.4) * EXPORT_DPI);
+
+  function merge(base, src) {
+    if (Array.isArray(base)) {
+      if (!Array.isArray(src)) return clone(base);
+      return base.map((b, i) => (i < src.length ? merge(b, src[i]) : clone(b)));
+    }
+    if (base && typeof base === 'object') {
+      const out = {};
+      for (const k of Object.keys(base)) out[k] = src && typeof src === 'object' && k in src ? merge(base[k], src[k]) : clone(base[k]);
+      return out;
+    }
+    if (src === undefined || src === null || typeof src !== typeof base) return base;
+    return src;
+  }
+  function sanitize(st) {
+    const hex = /^#[0-9a-f]{6}$/i;
+    for (const k of Object.keys(DEFAULTS.colors)) if (!hex.test(st.colors[k])) st.colors[k] = DEFAULTS.colors[k];
+    st.sizes.title = clamp(st.sizes.title, 48, 72);
+    st.sizes.slogan = clamp(st.sizes.slogan, 36, 48);
+    st.sizes.heading = clamp(st.sizes.heading, 28, 36);
+    st.sizes.body = clamp(st.sizes.body, 20, 24);
+    st.stepCount = clamp(Math.round(st.stepCount), 2, 4);
+    st.margin = clamp(st.margin, 15, 35);
+    st.gap = clamp(st.gap, 8, 24);
+    if (!FONTS.includes(st.fontHead)) st.fontHead = DEFAULTS.fontHead;
+    if (!FONTS.includes(st.fontBody)) st.fontBody = DEFAULTS.fontBody;
+    if (!(st.themeStyle in THEMES)) st.themeStyle = 'iub';
+    const keys = Object.keys(BLOCKS);
+    if (st.order.length !== keys.length || keys.some((k) => !st.order.includes(k))) st.order = [...DEFAULTS.order];
+    return st;
+  }
+
+  function lum(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrast(a, b) {
+    const x = lum(a), y = lum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+  const grade = (r, good, ok) => (r >= good ? 'pass' : r >= ok ? 'check' : 'fix');
+
+  /* ================= state + storage ================= */
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STATE_KEY);
+      if (raw) return sanitize(merge(DEFAULTS, JSON.parse(raw)));
+    } catch (e) { /* storage unavailable */ }
+    return clone(DEFAULTS);
+  }
+  let state = loadState();
+  let saveTimer = 0;
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+    }, 300);
+  }
+
+  const imageStore = (() => {
+    let dbp = null;
+    function open() {
+      if (!dbp) {
+        dbp = new Promise((resolve, reject) => {
+          try {
+            const req = indexedDB.open('wmhd-poster', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('images');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          } catch (e) { reject(e); }
+        });
+      }
+      return dbp;
+    }
+    async function run(mode, fn) {
+      const db = await open();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('images', mode);
+        const req = fn(tx.objectStore('images'));
+        tx.oncomplete = () => resolve(req ? req.result : undefined);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+    }
+    return {
+      put: (k, v) => run('readwrite', (s) => s.put(v, k)).catch(() => {}),
+      del: (k) => run('readwrite', (s) => s.delete(k)).catch(() => {}),
+      get: (k) => run('readonly', (s) => s.get(k)).catch(() => null),
+    };
+  })();
+
+  /* ================= images ================= */
+  const images = { visual: null, icons: [null, null, null, null] };
+
+  async function readImage(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.src = url;
+    try { await img.decode(); } catch (e) { URL.revokeObjectURL(url); throw e; }
+    const vector = blob.type === 'image/svg+xml' || /\.svg$/i.test(name || '');
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) { w = 1000; h = 1000; }
+    return { img, w, h, blob, name: name || 'image', url, vector };
+  }
+  function releaseImage(im) { if (im) URL.revokeObjectURL(im.url); }
+
+  async function setImage(slot, file) {
+    if (!file) return;
+    if (!/^image\/(png|jpeg|webp|svg\+xml)$/.test(file.type)) {
+      toast('Choose a PNG, JPG, WebP or SVG image.');
+      return;
+    }
+    try {
+      const im = await readImage(file, file.name);
+      if (slot === 'visual') { releaseImage(images.visual); images.visual = im; }
+      else { const i = Number(slot.slice(4)); releaseImage(images.icons[i]); images.icons[i] = im; }
+      imageStore.put(slot, { blob: file, name: file.name });
+      renderImageUI();
+      schedule();
+    } catch (e) {
+      toast('That image couldn’t be opened. Try saving it as PNG or JPG.');
+    }
+  }
+  function clearImage(slot) {
+    if (slot === 'visual') { releaseImage(images.visual); images.visual = null; }
+    else { const i = Number(slot.slice(4)); releaseImage(images.icons[i]); images.icons[i] = null; }
+    imageStore.del(slot);
+    renderImageUI();
+    schedule();
+  }
+  async function restoreImages() {
+    const slots = ['visual', 'icon0', 'icon1', 'icon2', 'icon3'];
+    await Promise.all(slots.map(async (slot) => {
+      const rec = await imageStore.get(slot);
+      if (!rec || !rec.blob) return;
+      try {
+        const im = await readImage(rec.blob, rec.name);
+        if (slot === 'visual') images.visual = im; else images.icons[Number(slot.slice(4))] = im;
+      } catch (e) { /* ignore unreadable */ }
+    }));
+    renderImageUI();
+    schedule();
+  }
+
+  /* ================= text layout ================= */
+  function wrap(ctx, str, maxW) {
+    const out = [];
+    for (const para of String(str).split('\n')) {
+      const ws = para.trim().split(/\s+/).filter(Boolean);
+      let line = '';
+      for (let w of ws) {
+        const test = line ? line + ' ' + w : w;
+        if (ctx.measureText(test).width <= maxW) { line = test; continue; }
+        if (line) out.push(line);
+        while (w.length > 1 && ctx.measureText(w).width > maxW) {
+          let cut = w.length - 1;
+          while (cut > 1 && ctx.measureText(w.slice(0, cut)).width > maxW) cut--;
+          out.push(w.slice(0, cut));
+          w = w.slice(cut);
+        }
+        line = w;
+      }
+      if (line) out.push(line);
+    }
+    return out;
+  }
+  // Narrowest width that keeps the same number of lines, so headings wrap evenly.
+  function wrapBalanced(ctx, str, maxW) {
+    const base = wrap(ctx, str, maxW);
+    if (base.length < 2) return base;
+    let lo = maxW * 0.4, hi = maxW;
+    for (let i = 0; i < 14; i++) {
+      const mid = (lo + hi) / 2;
+      if (wrap(ctx, str, mid).length > base.length) lo = mid; else hi = mid;
+    }
+    return wrap(ctx, str, hi);
+  }
+
+  /* ================= poster renderer =================
+     All geometry is in millimetres; S converts mm to canvas pixels.
+     Returns metrics used by the checklist. */
+  function drawPoster(ctx, S, preview) {
+    const st = state, col = st.colors;
+    const M = st.margin, CW = PAGE.w - 2 * M, G = st.gap;
+    const head = st.fontHead, body = st.fontBody;
+    const band = st.useAccent2 ? col.accent2 : col.accent;
+    const bandText = contrast(col.ink, band) >= contrast(col.bg, band) ? col.ink : col.bg;
+    const sloganColor = st.sloganColor === 'ink' ? col.ink : col.accent;
+    const m = { textArea: 0, visualArea: 0, visualBox: null, ppi: null, overflow: false, squeezed: false, band, bandText };
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = col.bg;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.textBaseline = 'top';
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    const font = (w, pt, fam) => `${w} ${pt * PT * S}px "${fam}", system-ui, sans-serif`;
+    const track = (em, pt) => { if ('letterSpacing' in ctx) ctx.letterSpacing = em ? `${em * pt * PT * S}px` : '0px'; };
+
+    function text(str, o) {
+      const cfg = Object.assign({ weight: 400, family: body, lh: 1.25, color: col.ink, upper: false, track: 0, balance: false, align: st.align, alpha: 1, counts: true }, o);
+      const s = cfg.upper ? str.toUpperCase() : str;
+      const setFont = () => { ctx.font = font(cfg.weight, cfg.pt, cfg.family); track(cfg.track, cfg.pt); };
+      setFont();
+      const lines = cfg.balance ? wrapBalanced(ctx, s, cfg.width * S) : wrap(ctx, s, cfg.width * S);
+      track(0);
+      const lineMm = cfg.pt * PT * cfg.lh;
+      return {
+        h: lines.length * lineMm,
+        draw(x, y, w) {
+          setFont();
+          ctx.globalAlpha = cfg.alpha;
+          ctx.fillStyle = cfg.color;
+          ctx.textAlign = cfg.align === 'center' ? 'center' : 'left';
+          const tx = cfg.align === 'center' ? x + w / 2 : x;
+          const off = (lineMm - cfg.pt * PT) / 2;
+          lines.forEach((ln, i) => {
+            ctx.fillText(ln, tx * S, (y + i * lineMm + off) * S);
+            if (cfg.counts) m.textArea += (ctx.measureText(ln).width / S) * lineMm;
+          });
+          ctx.globalAlpha = 1;
+          track(0);
+        },
+      };
+    }
+    function ghostBox(x, y, w, h, lines, color) {
+      ctx.save();
+      ctx.strokeStyle = color || col.ink;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 0.6 * S;
+      ctx.setLineDash([3 * S, 2 * S]);
+      ctx.strokeRect(x * S, y * S, w * S, h * S);
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = color || col.ink;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // screen-only labels: as large as the box allows, up to 30/22 pt
+      const base = [30, 22, 22, 22];
+      const fit = Math.min(1, (h - 3) / lines.reduce((a, _, i) => a + base[Math.min(i, 3)] * PT * 1.4, 0));
+      const sizes = base.map((p) => p * fit);
+      const lh = sizes.map((p) => p * PT * 1.4);
+      const total = lines.reduce((a, _, i) => a + lh[Math.min(i, 3)], 0);
+      let yy = y + h / 2 - total / 2;
+      lines.forEach((ln, i) => {
+        const p = sizes[Math.min(i, 3)];
+        ctx.font = font(i === 0 ? 700 : 400, p, body);
+        ctx.fillText(ln, (x + w / 2) * S, (yy + lh[Math.min(i, 3)] / 2) * S, (w - 6) * S);
+        yy += lh[Math.min(i, 3)];
+      });
+      ctx.restore();
+    }
+    const ghost = (lines, h) => ({ h, draw: (x, y, w) => ghostBox(x, y, w, h, lines) });
+    function stack(parts, spacing) {
+      const list = parts.filter(Boolean);
+      if (!list.length) return null;
+      const h = list.reduce((a, p) => a + p.h, 0) + spacing * (list.length - 1);
+      return { h, draw(x, y, w) { let yy = y; list.forEach((p) => { p.draw(x, yy, w); yy += p.h + spacing; }); } };
+    }
+    function drawFitted(im, x, y, w, h, mode) {
+      const k = mode === 'cover' ? Math.max(w / im.w, h / im.h) : Math.min(w / im.w, h / im.h);
+      const dw = im.w * k, dh = im.h * k;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x * S, y * S, w * S, h * S);
+      ctx.clip();
+      ctx.drawImage(im.img, (x + (w - dw) / 2) * S, (y + (h - dh) / 2) * S, dw * S, dh * S);
+      ctx.restore();
+      return { k, dw: Math.min(dw, w), dh: Math.min(dh, h) };
+    }
+
+    const blocks = {
+      theme() {
+        const eyebrow = st.showEyebrow && st.eyebrow.trim()
+          ? text(st.eyebrow.trim(), { pt: st.sizes.body, weight: 700, family: head, color: col.accent, upper: true, track: 0.08, lh: 1.2, width: CW })
+          : null;
+        const title = text(THEMES[st.themeStyle], { pt: st.sizes.title, weight: 700, family: head, lh: 1.08, balance: true, width: CW });
+        return stack([eyebrow, title], 3);
+      },
+      slogan() {
+        const s = st.slogan.trim();
+        if (s) return text(s, { pt: st.sizes.slogan, weight: 700, family: head, color: sloganColor, lh: 1.12, balance: true, width: CW });
+        return preview ? ghost(['Your headline or slogan', `${st.sizes.slogan} pt · short, original, yours`], st.sizes.slogan * PT * 1.12 + 10) : null;
+      },
+      message() {
+        if (!st.showMessage) return null;
+        const s = st.message.trim();
+        if (s) return text(s, { pt: st.sizes.body, lh: 1.3, width: Math.min(CW, 300) });
+        return preview ? ghost(['Key message', `${st.sizes.body} pt · one or two short lines`], st.sizes.body * PT * 1.3 * 2 + 6) : null;
+      },
+      flow() {
+        if (!st.showFlow) return null;
+        const n = st.stepCount;
+        const steps = st.steps.slice(0, n);
+        const hasText = steps.some((s) => s.h.trim() || s.c.trim());
+        if (!hasText && !preview) return null;
+        const gut = 8;
+        const colW = (CW - gut * (n - 1)) / n;
+        const D = Math.min(26, colW * 0.42);
+        const title = st.flowTitle.trim()
+          ? text(st.flowTitle.trim(), { pt: st.sizes.heading, weight: 700, family: head, lh: 1.15, balance: true, width: CW })
+          : null;
+        const cols = steps.map((s, i) => ({
+          hd: s.h.trim()
+            ? text(s.h.trim(), { pt: st.sizes.heading, weight: 700, family: head, lh: 1.12, width: colW - 2, align: 'center', balance: true })
+            : preview ? text(`Step ${i + 1}`, { pt: st.sizes.heading, weight: 700, family: head, lh: 1.12, width: colW - 2, align: 'center', alpha: 0.3, counts: false }) : null,
+          cp: s.c.trim() ? text(s.c.trim(), { pt: st.sizes.body, lh: 1.25, width: colW - 2, align: 'center' }) : null,
+        }));
+        const hdH = Math.max(0, ...cols.map((c) => (c.hd ? c.hd.h : 0)));
+        const cpH = Math.max(0, ...cols.map((c) => (c.cp ? c.cp.h : 0)));
+        const rowH = D + 5 + hdH + (cpH ? 2.5 + cpH : 0);
+        const titleH = title ? title.h + 6 : 0;
+        return {
+          h: titleH + rowH,
+          draw(x, y, w) {
+            if (title) title.draw(x, y, w);
+            const ry = y + titleH;
+            cols.forEach((c, i) => {
+              const cx = x + i * (colW + gut);
+              const mx = cx + colW / 2, my = ry + D / 2;
+              const icon = images.icons[i];
+              if (icon) {
+                drawFitted(icon, mx - D / 2, ry, D, D, 'contain');
+              } else {
+                ctx.fillStyle = col.accent;
+                ctx.beginPath();
+                ctx.arc(mx * S, my * S, (D / 2) * S, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = col.bg;
+                ctx.font = font(700, st.sizes.heading, head);
+                track(0);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(String(i + 1), mx * S, (my + 0.4) * S);
+                ctx.textBaseline = 'top';
+              }
+              m.visualArea += D * D;
+              if (i < n - 1) arrow(mx + D / 2 + 3, mx + colW + gut - D / 2 - 3, my);
+              if (c.hd) c.hd.draw(cx + 1, ry + D + 5, colW - 2);
+              if (c.cp) c.cp.draw(cx + 1, ry + D + 5 + hdH + 2.5, colW - 2);
+            });
+          },
+        };
+      },
+      cta() {
+        const lab = st.ctaHead.trim(), s = st.cta.trim();
+        if (!s && !lab && !preview) return null;
+        const pad = 9, innerW = CW - 2 * pad;
+        const L = lab ? text(lab, { pt: st.sizes.body, weight: 700, family: head, color: bandText, upper: true, track: 0.08, lh: 1.2, width: innerW }) : null;
+        const T = s ? text(s, { pt: st.sizes.heading, weight: 700, family: head, color: bandText, lh: 1.14, balance: true, width: innerW }) : null;
+        const ghostH = st.sizes.heading * PT * 1.14 + 8;
+        const mainH = T ? T.h : preview ? ghostH : 0;
+        const innerH = (L ? L.h + (mainH ? 3 : 0) : 0) + mainH;
+        return {
+          h: innerH + 2 * pad,
+          draw(x, y, w) {
+            ctx.fillStyle = band;
+            roundRect(x, y, w, innerH + 2 * pad, 3);
+            ctx.fill();
+            let yy = y + pad;
+            if (L) { L.draw(x + pad, yy, w - 2 * pad); yy += L.h + 3; }
+            if (T) T.draw(x + pad, yy, w - 2 * pad);
+            else if (preview) ghostBox(x + pad, yy, w - 2 * pad, ghostH, ['Your call to action', 'What should the viewer do or change?'], bandText);
+          },
+        };
+      },
+    };
+    function arrow(x1, x2, y) {
+      if (x2 - x1 < 8) return;
+      ctx.strokeStyle = col.accent;
+      ctx.fillStyle = col.accent;
+      ctx.lineWidth = 1.2 * S;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x1 * S, y * S);
+      ctx.lineTo((x2 - 3) * S, y * S);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2 * S, y * S);
+      ctx.lineTo((x2 - 4.5) * S, (y - 2.8) * S);
+      ctx.lineTo((x2 - 4.5) * S, (y + 2.8) * S);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x * S, y * S, w * S, h * S, r * S);
+      else ctx.rect(x * S, y * S, w * S, h * S);
+    }
+
+    // footer: names and an optional line, pinned to the bottom margin
+    const names = st.members.map((s) => s.trim()).filter(Boolean);
+    const footBody = stack([
+      st.printNames && names.length ? text(names.join('  ·  '), { pt: st.sizes.body, weight: 700, width: CW }) : null,
+      st.footer.trim() ? text(st.footer.trim(), { pt: st.sizes.body, width: CW }) : null,
+    ], 1.5);
+    const foot = footBody ? {
+      h: footBody.h + 6,
+      draw(x, y, w) {
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = col.ink;
+        ctx.fillRect(x * S, y * S, w * S, Math.max(1, 0.5 * S));
+        ctx.restore();
+        footBody.draw(x, y + 6, w);
+      },
+    } : null;
+
+    const cap = st.caption.trim() ? text(st.caption.trim(), { pt: st.sizes.body, lh: 1.25, width: CW }) : null;
+    const capH = cap ? cap.h + 4 : 0;
+
+    const seq = st.order
+      .map((k) => (k === 'visual' ? { k, visual: true } : { k, b: blocks[k]() }))
+      .filter((o) => o.visual || o.b);
+    const gapsN = seq.length - 1 + (foot ? 1 : 0);
+    const fixed = seq.reduce((a, o) => a + (o.visual ? 0 : o.b.h), 0) + (foot ? foot.h : 0) + gapsN * G;
+    let boxH = PAGE.h - 2 * M - fixed - capH;
+    const MIN_BOX = 80;
+    if (boxH < 0.3 * PAGE.h) m.squeezed = true;
+    if (boxH < MIN_BOX) { m.overflow = true; boxH = MIN_BOX; }
+
+    // "Show whole image": shrink the box to the image and share the spare height between the gaps
+    let extra = 0;
+    const vis = images.visual;
+    if (vis && st.fit === 'contain' && !m.overflow) {
+      const fitH = Math.min(boxH, CW * (vis.h / vis.w));
+      if (fitH < boxH) { extra = (boxH - fitH) / Math.max(1, gapsN); boxH = fitH; }
+    }
+
+    let y = M;
+    seq.forEach((o, i) => {
+      if (o.visual) {
+        m.visualBox = { w: CW, h: boxH };
+        if (vis) {
+          const r = drawFitted(vis, M, y, CW, boxH, st.fit);
+          m.visualArea += r.dw * r.dh;
+          m.ppi = vis.vector ? Infinity : 25.4 / r.k;
+        } else {
+          m.visualArea += CW * boxH;
+          if (preview) ghostBox(M, y, CW, boxH, [
+            'Your central visual',
+            'Your own illustration, photo or infographic',
+            `This space: ${Math.round(CW)} × ${Math.round(boxH)} mm`,
+            `For 300 dpi: at least ${pxAt300(CW)} × ${pxAt300(boxH)} px`,
+          ]);
+        }
+        if (cap) cap.draw(M, y + boxH + 4, CW);
+        y += boxH + capH;
+      } else {
+        o.b.draw(M, y, CW);
+        y += o.b.h;
+      }
+      if (i < seq.length - 1) y += G + extra;
+    });
+    const bottom = PAGE.h - M - (foot ? foot.h + G : 0);
+    if (y > bottom + 0.5) m.overflow = true;
+    if (foot) foot.draw(M, PAGE.h - M - foot.h, CW);
+
+    if (preview && st.guides) {
+      ctx.save();
+      ctx.strokeStyle = '#0a9bd0';
+      ctx.fillStyle = 'rgba(10, 155, 208, 0.06)';
+      ctx.lineWidth = Math.max(1, 0.35 * S);
+      const cols = 12, gutter = 5, cw = (CW - gutter * (cols - 1)) / cols;
+      for (let i = 0; i < cols; i++) ctx.fillRect((M + i * (cw + gutter)) * S, M * S, cw * S, (PAGE.h - 2 * M) * S);
+      ctx.setLineDash([2 * S, 1.5 * S]);
+      ctx.strokeRect(M * S, M * S, CW * S, (PAGE.h - 2 * M) * S);
+      ctx.beginPath();
+      ctx.moveTo((PAGE.w / 2) * S, 0);
+      ctx.lineTo((PAGE.w / 2) * S, PAGE.h * S);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+    return m;
+  }
+
+  /* ================= fonts ================= */
+  function allText() {
+    const st = state;
+    return [THEMES[st.themeStyle], st.eyebrow, st.slogan, st.message, st.flowTitle, st.ctaHead, st.cta, st.footer, st.caption,
+      ...st.members, ...st.steps.flatMap((s) => [s.h, s.c]), 'Step 1234'].join(' ');
+  }
+  async function ensureFonts() {
+    if (!document.fonts || !document.fonts.load) return;
+    const sample = allText().toUpperCase() + allText();
+    const specs = [
+      `700 32px "${state.fontHead}"`,
+      `700 32px "${state.fontBody}"`,
+      `400 32px "${state.fontBody}"`,
+    ];
+    try { await Promise.all(specs.map((s) => document.fonts.load(s, sample))); } catch (e) { /* draw with fallback */ }
+  }
+
+  /* ================= preview ================= */
+  const canvas = $('#poster');
+  const mat = $('#mat');
+  let metrics = null;
+  let pending = false;
+  let drawSeq = 0;
+
+  function sizeCanvas() {
+    const wide = matchMedia('(min-width: 1181px)').matches;
+    const note = $('#matNote');
+    const availW = mat.clientWidth - 32;
+    let cssW;
+    if (wide) {
+      const availH = mat.clientHeight - 32 - note.offsetHeight - 10;
+      cssW = Math.min(availW, (availH * PAGE.w) / PAGE.h);
+    } else {
+      cssW = Math.min(availW, 560);
+    }
+    cssW = Math.max(160, Math.floor(cssW));
+    const cssH = Math.round((cssW * PAGE.h) / PAGE.w);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    const pw = Math.round(cssW * dpr), ph = Math.round(cssH * dpr);
+    if (canvas.width !== pw || canvas.height !== ph) { canvas.width = pw; canvas.height = ph; }
+  }
+
+  function schedule() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(async () => {
+      pending = false;
+      const mySeq = ++drawSeq;
+      await ensureFonts();
+      if (mySeq !== drawSeq) return;
+      sizeCanvas();
+      metrics = drawPoster(canvas.getContext('2d'), canvas.width / PAGE.w, true);
+      updateReadouts();
+      renderChecks();
+    });
+  }
+
+  /* ================= checks ================= */
+  function printedWords() {
+    const st = state;
+    let n = words(st.slogan) + words(st.caption) + words(st.ctaHead) + words(st.cta);
+    if (st.showEyebrow) n += words(st.eyebrow);
+    if (st.showMessage) n += words(st.message);
+    if (st.showFlow) {
+      n += words(st.flowTitle);
+      st.steps.slice(0, st.stepCount).forEach((s) => { n += words(s.h) + words(s.c); });
+    }
+    return n;
+  }
+  function scanLanguage() {
+    const st = state;
+    const fields = [
+      ['Label', st.showEyebrow ? st.eyebrow : ''], ['Headline', st.slogan], ['Key message', st.showMessage ? st.message : ''],
+      ['Caption', st.caption], ['Flow heading', st.showFlow ? st.flowTitle : ''],
+      ...st.steps.slice(0, st.stepCount).map((s, i) => [`Step ${i + 1}`, st.showFlow ? `${s.h} ${s.c}` : '']),
+      ['Call to action', `${st.ctaHead} ${st.cta}`], ['Footer', st.footer],
+    ];
+    const hits = [];
+    for (const [where, value] of fields) {
+      if (!value) continue;
+      for (const rule of LANGUAGE) {
+        rule.re.lastIndex = 0;
+        let mt;
+        while ((mt = rule.re.exec(value))) hits.push({ where, word: mt[0], level: rule.level, alt: rule.alt });
+      }
+    }
+    return hits;
+  }
+  function deadlineInfo() {
+    const ms = DEADLINE - new Date();
+    if (ms < 0) return { status: 'fix', short: 'Submission closed 6 Oct', long: 'The deadline was 6 October 2026.' };
+    const d = Math.floor(ms / 864e5);
+    const left = d >= 2 ? `${d} days left` : d === 1 ? '1 day left' : 'Due today';
+    return { status: d >= 3 ? 'pass' : 'check', short: `Submit by 6 Oct · ${left}`, long: `${left}. Exhibition and certificates on 13 Oct 2026 at IUB.` };
+  }
+
+  function evaluate() {
+    const st = state, mx = metrics || {};
+    const out = [];
+    const add = (g, s, t, d, html) => out.push({ g, s, t, d, html });
+    const A = 'Guideline checklist', B = 'Print specification', C = 'Team and dates';
+
+    add(A, 'pass', 'Theme line is exact', `Locked to the official words, printed as the title at ${st.sizes.title} pt.`);
+
+    const sw = words(st.slogan);
+    if (!sw) add(A, 'todo', 'Headline or slogan', 'Write a short, original line of your own in Words.');
+    else if (sw <= 8) add(A, 'pass', 'Headline is short', `${sw} word${sw === 1 ? '' : 's'}. Short lines are easier to remember.`);
+    else if (sw <= 12) add(A, 'check', 'Headline is long', `${sw} words. Can you cut it to 8 or fewer?`);
+    else add(A, 'fix', 'Headline is too long', `${sw} words. A slogan should read at a glance.`);
+
+    if (st.takeaway.trim()) add(A, 'pass', 'Main idea in one sentence', 'Written. Test it: show the poster to a friend for 5 seconds and ask them to say it back.');
+    else add(A, 'todo', 'Main idea in one sentence', 'Write what a viewer should understand, feel or do, in Focus.');
+
+    const msg = MESSAGES.find((x) => x[0] === st.focusMessage);
+    const dom = DOMAINS.find((x) => x[0] === st.focusDomain);
+    if (msg && dom) add(A, 'pass', 'One message, one domain', `${msg[1]} · ${dom[1]}`);
+    else add(A, 'todo', 'One message, one domain', 'Pick one of each in Focus so the poster stays on the theme, not mental health in general.');
+
+    const vis = images.visual;
+    if (!vis) add(A, 'todo', 'Central visual', 'Add your own illustration, photo or infographic in Visual.');
+    else if (vis.vector) add(A, 'pass', 'Central visual is sharp', 'Vector image. Prints sharp at any size.');
+    else if (mx.ppi) {
+      const p = Math.round(mx.ppi);
+      const need = mx.visualBox ? `${pxAt300(mx.visualBox.w)} px wide` : 'a larger file';
+      if (p >= 300) add(A, 'pass', 'Central visual is sharp', `${p} ppi at print size.`);
+      else if (p >= 200) add(A, 'check', 'Visual may print soft', `${p} ppi at print size. Aim for 300: use a file about ${need}.`);
+      else add(A, 'fix', 'Visual will print blurry', `${p} ppi at print size. Use a file about ${need}, or scan your drawing at 600 dpi.`);
+    }
+
+    const wc = printedWords();
+    if (wc <= 60) add(A, 'pass', 'Text is minimal', `${wc} words, not counting the theme line and footer.`);
+    else if (wc <= 90) add(A, 'check', 'Quite a lot of text', `${wc} words. Cut to short phrases and keywords.`);
+    else add(A, 'fix', 'Too much text', `${wc} words. Posters are read in seconds. Cut to phrases.`);
+
+    const hits = scanLanguage();
+    const list = hits.slice(0, 6).map((h) => `<br><em>“${esc(h.word)}”</em> in ${esc(h.where)}: ${esc(h.alt)}`).join('');
+    if (hits.some((h) => h.level === 'fix')) add(A, 'fix', 'Stigmatising language', '', `Change these words.${list}`);
+    else if (hits.length) add(A, 'check', 'Check your wording', '', `These words can stigmatise, depending on use.${list}`);
+    else add(A, 'pass', 'No stigmatising words found', 'Automatic scan of every text field. Still read it aloud once.');
+
+    if (st.cta.trim()) add(A, 'pass', 'Call to action', `“${st.cta.trim()}”`);
+    else add(A, 'todo', 'Call to action', 'Tell the viewer what to do or change, in Words.');
+
+    // print specification
+    add(B, 'pass', 'A2 portrait', '420 × 594 mm (16.5 × 23.4 in).');
+    add(B, 'pass', '300 dpi export', '4961 × 7016 px PNG, or an A2 PDF.');
+    add(B, 'pass', 'Type sizes in range', `Title ${st.sizes.title} · slogan ${st.sizes.slogan} · headings ${st.sizes.heading} · text ${st.sizes.body} pt`);
+    const fams = [...new Set([st.fontHead, st.fontBody])];
+    add(B, 'pass', `${fams.length} font ${fams.length === 1 ? 'family' : 'families'}`, fams.join(' + '));
+
+    const colours = new Set([st.colors.bg, st.colors.ink, st.colors.accent, st.useAccent2 ? st.colors.accent2 : null].filter(Boolean).map((c) => c.toLowerCase()));
+    if (colours.size >= 2 && colours.size <= 4) add(B, 'pass', `${colours.size} main colours`, 'Within the 2 to 4 allowed.');
+    else add(B, 'fix', `${colours.size} main colour${colours.size === 1 ? '' : 's'}`, 'Use 2 to 4 colours.');
+
+    const rInk = contrast(st.colors.ink, st.colors.bg);
+    const rAcc = contrast(st.colors.accent, st.colors.bg);
+    const rBand = contrast(mx.bandText || st.colors.ink, mx.band || st.colors.accent);
+    const cs = [grade(rInk, 7, 4.5), grade(rAcc, 4.5, 3), grade(rBand, 4.5, 3)];
+    const worst = cs.includes('fix') ? 'fix' : cs.includes('check') ? 'check' : 'pass';
+    add(B, worst, worst === 'pass' ? 'Strong contrast' : 'Contrast is weak', `Text ${rInk.toFixed(1)}:1 · accent ${rAcc.toFixed(1)}:1 · action band ${rBand.toFixed(1)}:1`);
+
+    const total = (mx.visualArea || 0) + (mx.textArea || 0);
+    const share = total ? (100 * mx.visualArea) / total : 0;
+    const started = !!images.visual && !!st.slogan.trim();
+    const bs = !started ? 'todo' : share >= 58 && share <= 75 ? 'pass' : (share >= 45 && share < 58) || (share > 75 && share <= 85) ? 'check' : 'fix';
+    const bt = bs === 'todo' ? 'Visual and text balance' : bs === 'pass' ? 'Visual and text balanced' : share < 58 ? 'Text-heavy' : 'Very little text';
+    const pos = clamp(share, 0, 100).toFixed(1);
+    add(B, bs, bt, '', `About ${Math.round(share)}% visual, ${Math.round(100 - share)}% text by area. The guideline is 60–70% visual.${images.visual ? '' : ' The empty visual box is counted as planned.'}
+      <div class="meter" aria-hidden="true"><span class="zone"></span><span class="mark" style="left:${pos}%"></span></div>
+      <div class="meter-scale" aria-hidden="true"><span>all text</span><span>60–70%</span><span>all visual</span></div>`);
+
+    if (mx.visualBox) {
+      const vshare = (mx.visualBox.w * mx.visualBox.h) / ((PAGE.w - 2 * st.margin) * (PAGE.h - 2 * st.margin));
+      const vs = vshare >= 0.33 ? 'pass' : vshare >= 0.24 ? 'check' : 'fix';
+      add(B, vs, vs === 'pass' ? 'One dominant visual' : 'Visual is small', `The visual takes ${Math.round(vshare * 100)}% of the printable area.`);
+    }
+
+    if (mx.overflow) add(B, 'fix', 'Content runs off the page', 'Shorten text, lower sizes, or turn off the flow or message.');
+    else if (mx.squeezed) add(B, 'check', 'Visual is squeezed', 'Text is crowding the visual. Cut words or drop a part.');
+    else add(B, 'pass', 'Everything fits', 'Nothing runs past the margins.');
+
+    const o = st.order;
+    const orderOk = o.indexOf('theme') <= 1 && o.indexOf('visual') <= 2 && o.indexOf('cta') >= o.indexOf('visual');
+    add(B, orderOk ? 'pass' : 'check', 'Reading order', orderOk
+      ? `${BLOCKS[o[0]]} first, then ${BLOCKS[o[1]].toLowerCase()}.`
+      : 'Most posters lead with the title and visual, and end on the call to action.');
+
+    // team and dates
+    const names = st.members.map((s) => s.trim()).filter(Boolean);
+    if (names.length) add(C, 'pass', `${names.length === 1 ? 'Individual entry' : `Group of ${names.length}`}`, names.join(', '));
+    else add(C, 'todo', 'Team', 'Add your name, or up to 3 names, in Focus.');
+    const dl = deadlineInfo();
+    add(C, dl.status, 'Submission deadline', dl.long);
+    return out;
+  }
+
+  function renderChecks() {
+    const items = evaluate();
+    const decl = DECLS.map(([k]) => (state.decl[k] ? 'pass' : 'todo'));
+    const all = items.map((i) => i.s).concat(decl);
+    const count = (s) => all.filter((x) => x === s).length;
+    const labels = { pass: 'Pass', check: 'Check', fix: 'Fix', todo: 'To do' };
+    $('#tally').innerHTML = ['pass', 'check', 'fix', 'todo']
+      .filter((s) => count(s))
+      .map((s) => `<span class="pill ${s}">${count(s)} ${labels[s]}</span>`)
+      .join('');
+
+    const groups = [...new Set(items.map((i) => i.g))];
+    $('#groups').innerHTML = groups.map((g) => `
+      <div class="group"><h3>${esc(g)}</h3>
+        ${items.filter((i) => i.g === g).map((i) => `
+          <div class="item"><span class="pill ${i.s}">${labels[i.s]}</span>
+            <div><div class="t">${esc(i.t)}</div><div class="d">${i.html != null ? i.html : esc(i.d)}</div></div>
+          </div>`).join('')}
+      </div>`).join('');
+
+    const box = $('#decls');
+    if (!box.childElementCount) {
+      box.innerHTML = DECLS.map(([k, t]) => `
+        <div class="item"><span class="pill todo" data-decl-pill="${k}">To do</span>
+          <label class="check-line"><input type="checkbox" id="decl-${k}" data-bind="decl.${k}"> <span>${esc(t)}</span></label>
+        </div>`).join('');
+      $$('input', box).forEach((el) => { el.checked = !!getPath(state, el.dataset.bind); bindInput(el); });
+    }
+    DECLS.forEach(([k]) => {
+      const pill = $(`[data-decl-pill="${k}"]`);
+      const s = state.decl[k] ? 'pass' : 'todo';
+      pill.className = `pill ${s}`;
+      pill.textContent = labels[s];
+    });
+
+    const dl = deadlineInfo();
+    const due = $('#due');
+    due.textContent = dl.short;
+    due.className = `due ${dl.status}`;
+  }
+
+  /* ================= controls ================= */
+  function readoutPt(pt) { return `${pt} pt · ${(pt * PT).toFixed(1)} mm · ${Math.round((pt * EXPORT_DPI) / 72)} px`; }
+  function setHint(key, textValue, warn) {
+    $$(`[data-hint="${key}"]`).forEach((el) => { el.textContent = textValue; el.classList.toggle('warn', !!warn); });
+  }
+  function updateReadouts() {
+    const st = state;
+    $('#themeText').textContent = THEMES[st.themeStyle];
+    $('#o-title').textContent = readoutPt(st.sizes.title);
+    $('#o-slogan').textContent = readoutPt(st.sizes.slogan);
+    $('#o-heading').textContent = readoutPt(st.sizes.heading);
+    $('#o-body').textContent = readoutPt(st.sizes.body);
+    $('#o-margin').textContent = `${st.margin} mm`;
+    $('#o-gap').textContent = `${st.gap} mm`;
+
+    setHint('title', `Prints at ${st.sizes.title} pt, bold. Change the size in Style.`);
+    setHint('eyebrow', `Prints at ${st.sizes.body} pt in capitals.`);
+    const sw = words(st.slogan);
+    setHint('slogan', `Prints at ${st.sizes.slogan} pt · ${sw} word${sw === 1 ? '' : 's'}${sw > 8 ? ' · try 8 or fewer' : ''}`, sw > 8);
+    const mw = words(st.message);
+    setHint('message', `Prints at ${st.sizes.body} pt · ${mw} word${mw === 1 ? '' : 's'}${mw > 25 ? ' · keep it under 25' : ''}`, mw > 25);
+    setHint('heading', `Prints at ${st.sizes.heading} pt.`);
+    setHint('steps', `Step headings print at ${st.sizes.heading} pt, captions at ${st.sizes.body} pt. Keep captions to a few words.`);
+    setHint('cta', `Prints at ${st.sizes.heading} pt on a coloured band. Make it something a person can actually do.`);
+    setHint('caption', `Prints at ${st.sizes.body} pt.`);
+    setHint('footer', `Prints at ${st.sizes.body} pt, the smallest size allowed.`);
+
+    const fams = new Set([st.fontHead, st.fontBody]).size;
+    $('#fontHint').textContent = `${fams} font ${fams === 1 ? 'family' : 'families'} in use. For Bangla text, Hind Siliguri has Bangla letters.`;
+
+    const c = st.colors;
+    ['bg', 'ink', 'accent', 'accent2'].forEach((k) => { $(`#x-${k}`).textContent = c[k]; });
+    const band = metrics ? metrics.band : c.accent;
+    const bandText = metrics ? metrics.bandText : c.ink;
+    const ratio = (el, r, good, ok) => { el.textContent = `${r.toFixed(1)}:1`; el.className = `ratio ${grade(r, good, ok)}`; };
+    ratio($('#r-ink'), contrast(c.ink, c.bg), 7, 4.5);
+    ratio($('#r-accent'), contrast(c.accent, c.bg), 4.5, 3);
+    ratio($('#r-band'), contrast(bandText, band), 4.5, 3);
+    $('#cAccent2').disabled = !st.useAccent2;
+
+    $$('[data-step]').forEach((el) => { el.hidden = Number(el.dataset.step) >= st.stepCount; });
+    $('#flowFields').hidden = !st.showFlow;
+    $('#guidesBtn').setAttribute('aria-pressed', String(!!st.guides));
+    renderImageInfo();
+  }
+
+  function bindInput(el) {
+    const path = el.dataset.bind;
+    const handler = () => {
+      let v;
+      if (el.type === 'checkbox') v = el.checked;
+      else if (el.type === 'radio') { if (!el.checked) return; v = el.value; }
+      else v = el.value;
+      if (el.dataset.type === 'number') v = Number(v);
+      setPath(state, path, v);
+      if (path === 'showFlow' || path === 'showMessage') renderOrder();
+      changed();
+    };
+    el.addEventListener(el.type === 'checkbox' || el.type === 'radio' || el.tagName === 'SELECT' ? 'change' : 'input', handler);
+  }
+  function syncInputs() {
+    $$('[data-bind]').forEach((el) => {
+      const v = getPath(state, el.dataset.bind);
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (el.type === 'radio') el.checked = el.value === String(v);
+      else el.value = v == null ? '' : v;
+    });
+    renderOrder();
+  }
+  function changed() { persist(); schedule(); }
+
+  function buildStaticControls() {
+    const fm = $('#focusMessage');
+    MESSAGES.forEach(([v, t]) => fm.append(new Option(t, v)));
+    $('#domainChips').innerHTML = DOMAINS.map(([v, t, d]) => `
+      <label class="chip-opt"><input type="radio" name="focusDomain" value="${v}" data-bind="focusDomain"><b>${esc(t)}</b><small>${esc(d)}</small></label>`).join('');
+    ['#fontHead', '#fontBody'].forEach((sel) => {
+      const s = $(sel);
+      FONTS.forEach((f) => { const o = new Option(f, f); o.style.fontFamily = `"${f}"`; s.append(o); });
+    });
+    $('#iconSlots').innerHTML = [0, 1, 2, 3].map((i) => `
+      <div class="icon-slot" data-step="${i}">
+        <b>Step ${i + 1}</b>
+        <span class="state" id="iconState${i}">Numbered circle</span>
+        <div class="btns">
+          <span class="btn small file-btn">Choose<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-icon="${i}" aria-label="Choose an icon for step ${i + 1}"></span>
+          <button class="btn small" type="button" data-icon-clear="${i}" hidden>Remove</button>
+        </div>
+      </div>`).join('');
+    $$('[data-icon]').forEach((inp) => inp.addEventListener('change', () => { setImage(`icon${inp.dataset.icon}`, inp.files[0]); inp.value = ''; }));
+    $$('[data-icon-clear]').forEach((b) => b.addEventListener('click', () => clearImage(`icon${b.dataset.iconClear}`)));
+  }
+
+  function renderOrder() {
+    const ol = $('#order');
+    ol.textContent = '';
+    state.order.forEach((k, i) => {
+      const off = (k === 'flow' && !state.showFlow) || (k === 'message' && !state.showMessage);
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="n">${i + 1}</span><span class="nm">${esc(BLOCKS[k])}${off ? ' <small>(turned off)</small>' : ''}</span>
+        <button type="button" class="icon-btn" data-move="-1" aria-label="Move ${esc(BLOCKS[k])} up" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" class="icon-btn" data-move="1" aria-label="Move ${esc(BLOCKS[k])} down" ${i === state.order.length - 1 ? 'disabled' : ''}>↓</button>`;
+      $$('button', li).forEach((b) => b.addEventListener('click', () => {
+        const dir = Number(b.dataset.move), j = i + dir;
+        [state.order[i], state.order[j]] = [state.order[j], state.order[i]];
+        renderOrder();
+        changed();
+        const target = ol.children[j] && ol.children[j].querySelector(`[data-move="${dir}"]:not([disabled])`);
+        (target || (ol.children[j] && ol.children[j].querySelector('button:not([disabled])')))?.focus();
+      }));
+      ol.append(li);
+    });
+  }
+
+  function renderImageUI() {
+    images.icons.forEach((im, i) => {
+      $(`#iconState${i}`).textContent = im ? im.name : 'Numbered circle';
+      $(`[data-icon-clear="${i}"]`).hidden = !im;
+    });
+    renderImageInfo();
+  }
+  let infoFor;
+  function renderImageInfo() {
+    const el = $('#visualInfo');
+    const im = images.visual;
+    if (!im) {
+      const w = PAGE.w - 2 * state.margin;
+      el.innerHTML = `<span>No visual yet. For a full-width image at 300 dpi, use a file at least ${pxAt300(w)} px wide. A drawing scanned at 600 dpi works well.</span>`;
+      infoFor = null;
+      return;
+    }
+    if (infoFor !== im) {
+      infoFor = im;
+      el.innerHTML = `<b>${esc(im.name)}</b><span id="visualQuality"></span>
+        <span><button class="btn small" type="button" id="visualClear">Remove visual</button></span>`;
+      $('#visualClear').addEventListener('click', () => clearImage('visual'));
+    }
+    const ppi = metrics && metrics.ppi;
+    const q = im.vector ? 'vector, sharp at any size' : ppi ? `about ${Math.round(ppi)} ppi at print size` : '';
+    $('#visualQuality').textContent = `${im.vector ? 'SVG' : `${im.w} × ${im.h} px`}${q ? ' · ' + q : ''}`;
+  }
+
+  function setupTabs() {
+    const tabs = $$('.tab');
+    const show = (tab, focus) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        $('#' + t.getAttribute('aria-controls')).hidden = !on;
+      });
+      if (focus) tab.focus();
+      try { localStorage.setItem(TAB_KEY, tab.id); } catch (e) { /* ignore */ }
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => show(t));
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          show(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true);
+        }
+      });
+    });
+    let saved = null;
+    try { saved = localStorage.getItem(TAB_KEY); } catch (e) { /* ignore */ }
+    show(tabs.find((t) => t.id === saved) || tabs[0]);
+  }
+
+  function setupDrop() {
+    const drop = $('#drop');
+    $('#visualFile').addEventListener('change', (e) => { setImage('visual', e.target.files[0]); e.target.value = ''; });
+    ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('over')));
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer && e.dataTransfer.files[0];
+      if (f) setImage('visual', f);
+    });
+  }
+
+  /* ================= export ================= */
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+  // Canvas PNGs carry no resolution; add a pHYs chunk so print software reads 300 dpi (A2 size).
+  async function pngWithDpi(blob, dpi) {
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    const view = new DataView(buf.buffer);
+    const ppm = Math.round(dpi / 0.0254);
+    const phys = new Uint8Array(21);
+    const pv = new DataView(phys.buffer);
+    pv.setUint32(0, 9);
+    phys.set([0x70, 0x48, 0x59, 0x73], 4);
+    pv.setUint32(8, ppm);
+    pv.setUint32(12, ppm);
+    phys[16] = 1;
+    pv.setUint32(17, crc32(phys.subarray(4, 17)));
+    const parts = [buf.subarray(0, 8)];
+    let p = 8;
+    while (p + 8 <= buf.length) {
+      const len = view.getUint32(p);
+      const type = String.fromCharCode(buf[p + 4], buf[p + 5], buf[p + 6], buf[p + 7]);
+      const end = p + 12 + len;
+      if (type !== 'pHYs') parts.push(buf.subarray(p, end));
+      if (type === 'IHDR') parts.push(phys);
+      p = end;
+    }
+    return new Blob(parts, { type: 'image/png' });
+  }
+  const toBlob = (c, type, q) => new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), type, q));
+
+  async function renderForPrint() {
+    await ensureFonts();
+    const S = EXPORT_DPI / 25.4;
+    const c = document.createElement('canvas');
+    c.width = Math.round(PAGE.w * S);
+    c.height = Math.round(PAGE.h * S);
+    const ctx = c.getContext('2d');
+    if (!ctx) throw new Error('canvas');
+    drawPoster(ctx, S, false);
+    return c;
+  }
+
+  const downloadsReady = window.claude && typeof window.claude.use === 'function'
+    ? window.claude.use('downloads').catch(() => null)
+    : null;
+  async function saveFile(name, blob) {
+    if (downloadsReady) {
+      const dl = await downloadsReady;
+      if (!dl) { toast('Saving files isn’t available in this view. Open the workbench file from the repository to export.'); return false; }
+      try {
+        await dl.save({ filename: name, data: blob });
+        toast(`Saved ${name}`);
+        return true;
+      } catch (e) {
+        const code = e && e.code;
+        if (code === 'declined') toast('Save cancelled.');
+        else if (code === 'rate_limited') toast('A save prompt is already open. Finish that one first.');
+        else if (code === 'too_large') toast('The file is too large for this destination.');
+        else toast('The file couldn’t be saved here.');
+        return false;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast(`Downloaded ${name}`);
+    return true;
+  }
+
+  function exportWarning() {
+    const items = evaluate();
+    const fixes = items.filter((i) => i.s === 'fix').length;
+    const todos = items.filter((i) => i.s === 'todo').length;
+    const bits = [];
+    if (fixes) bits.push(`${fixes} to fix`);
+    if (todos) bits.push(`${todos} to do`);
+    return bits.length ? ` Checklist still shows ${bits.join(' and ')}.` : '';
+  }
+  async function busy(btn, fn) {
+    btn.disabled = true;
+    const label = btn.innerHTML;
+    btn.textContent = 'Preparing…';
+    try { await fn(); } finally { btn.disabled = false; btn.innerHTML = label; }
+  }
+
+  $('#exportPng').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    try {
+      const c = await renderForPrint();
+      const png = await pngWithDpi(await toBlob(c, 'image/png'), EXPORT_DPI);
+      c.width = c.height = 0;
+      const ok = await saveFile('wmhd-2026-poster-A2-300dpi.png', png);
+      if (ok) { const w = exportWarning(); if (w) toast(`Exported.${w}`); }
+    } catch (err) {
+      toast('This device couldn’t build a 4961 × 7016 px image. Try a laptop or desktop browser.');
+    }
+  }));
+
+  $('#exportPdf').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) { toast('The PDF tool didn’t load. Check your connection, or export PNG instead.'); return; }
+    try {
+      const c = await renderForPrint();
+      const jpg = new Uint8Array(await (await toBlob(c, 'image/jpeg', 0.95)).arrayBuffer());
+      c.width = c.height = 0;
+      const pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a2', compress: true });
+      pdf.setProperties({ title: `World Mental Health Day 2026 poster: ${THEMES.wfmh}`, subject: 'IUB World Mental Health Day 2026 poster competition' });
+      pdf.addImage(jpg, 'JPEG', 0, 0, PAGE.w, PAGE.h);
+      const ok = await saveFile('wmhd-2026-poster-A2.pdf', pdf.output('blob'));
+      if (ok) { const w = exportWarning(); if (w) toast(`Exported.${w}`); }
+    } catch (err) {
+      toast('This device couldn’t build the A2 PDF. Try a laptop or desktop browser.');
+    }
+  }));
+
+  function dataURLToBlob(url) {
+    const [meta, b64] = url.split(',');
+    const type = (meta.match(/^data:([^;]+)/) || [])[1] || 'application/octet-stream';
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type });
+  }
+  const blobToDataURL = (b) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
+  $('#saveProject').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+    const pack = async (im) => (im ? { name: im.name, data: await blobToDataURL(im.blob) } : null);
+    const data = {
+      app: 'wmhd-poster-workbench', version: 1, saved: new Date().toISOString(),
+      state, images: { visual: await pack(images.visual), icons: await Promise.all(images.icons.map(pack)) },
+    };
+    await saveFile('wmhd-poster-project.json', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  }));
+
+  $('#openProject').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      if (!data || data.app !== 'wmhd-poster-workbench') throw new Error('not a project');
+      state = sanitize(merge(DEFAULTS, data.state));
+      const unpack = async (rec) => {
+        if (!rec || typeof rec.data !== 'string') return null;
+        return { blob: dataURLToBlob(rec.data), name: rec.name };
+      };
+      const vis = await unpack(data.images && data.images.visual);
+      const icons = await Promise.all([0, 1, 2, 3].map((i) => unpack(data.images && data.images.icons && data.images.icons[i])));
+      releaseImage(images.visual);
+      images.icons.forEach(releaseImage);
+      images.visual = vis ? await readImage(vis.blob, vis.name) : null;
+      images.icons = await Promise.all(icons.map((r) => (r ? readImage(r.blob, r.name) : null)));
+      imageStore.del('visual');
+      [0, 1, 2, 3].forEach((i) => imageStore.del(`icon${i}`));
+      if (vis) imageStore.put('visual', vis);
+      icons.forEach((r, i) => { if (r) imageStore.put(`icon${i}`, r); });
+      syncInputs();
+      renderImageUI();
+      changed();
+      toast(`Opened ${f.name}`);
+    } catch (err) {
+      toast('That file isn’t a saved poster project.');
+    }
+  });
+
+  // Two-step reset: the first press arms it, the second clears.
+  let resetArmed = 0;
+  $('#reset').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    if (!resetArmed) {
+      btn.textContent = 'Press again to clear';
+      resetArmed = setTimeout(() => { resetArmed = 0; btn.textContent = 'Clear everything'; }, 4000);
+      return;
+    }
+    clearTimeout(resetArmed);
+    resetArmed = 0;
+    btn.textContent = 'Clear everything';
+    state = clone(DEFAULTS);
+    releaseImage(images.visual);
+    images.icons.forEach(releaseImage);
+    images.visual = null;
+    images.icons = [null, null, null, null];
+    ['visual', 'icon0', 'icon1', 'icon2', 'icon3'].forEach((k) => imageStore.del(k));
+    syncInputs();
+    renderImageUI();
+    changed();
+    toast('Cleared. The workbench is back to its starting state.');
+  });
+
+  /* ================= misc ================= */
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 5200);
+  }
+
+  $('#guidesBtn').addEventListener('click', () => { state.guides = !state.guides; changed(); });
+  $('#squintBtn').addEventListener('click', (e) => {
+    const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
+    e.currentTarget.setAttribute('aria-pressed', String(on));
+    mat.classList.toggle('squint', on);
+    $('#matNote').textContent = on
+      ? 'Squint test: the theme, your slogan and the visual should still stand out.'
+      : 'Dashed boxes are placeholders. They show on screen only and never export.';
+  });
+
+  if ('ResizeObserver' in window) new ResizeObserver(() => schedule()).observe(mat);
+  else window.addEventListener('resize', schedule);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => schedule());
+
+  buildStaticControls();
+  $$('[data-bind]').forEach(bindInput);
+  syncInputs();
+  setupTabs();
+  setupDrop();
+  renderImageUI();
+  schedule();
+  restoreImages();
+})();
+</script>
+</body>
+</html>
