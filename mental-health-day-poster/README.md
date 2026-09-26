@@ -15,11 +15,12 @@ Poster for the World Mental Health Day 2026 poster competition at IUB.
 ## Design
 
 - **One clear message:** listening to lived experience leads to real change (slogan: "Listen to the voice, not the label.")
-- **Central visual:** a person shares their story (speech bubble with a voice waveform), a listener receives it, and ripples spread outward to a community standing together — listen → value → include → change.
-- **Flow band:** Listen → Value → Include → Change with icons and short captions.
+- **Central visual:** two detailed profile silhouettes face each other — the speaker's tangled thoughts become a flowing line into a heart-shaped speech bubble carrying a voice waveform; the listener holds a heart in mind; ripples, butterflies and rising hearts spread to a diverse community (seven varied figures, including a child) standing on common ground with corner foliage.
+- **Decorative system:** double frame with corner diamonds, ornamental rules with diamond glyphs, folded-ribbon slogan banner, swash underline, dotted-path flow with numbered double-ring medallions, oversized quote marks in the CTA band, sparkle accents, dot-grid texture patches, and soft background arcs and tint blobs.
+- **Flow band:** "From being heard to real change" — Listen → Value → Include → Change medallions with icons, numbers and short captions.
 - **Call to action:** "Listen without judgement — and include people in the decisions that affect them."
-- **Colours:** deep teal `#12626B`, coral `#E0684B`, amber `#E89A3C` on warm ivory `#FAF6EF`; dark ink `#1E2A2B` for text.
-- **Fonts:** Fraunces (display) + Work Sans (supporting) — two families, loaded from Google Fonts.
+- **Colours:** deep teal `#12626B` / ink teal `#0E3A40`, coral `#E0684B` / deep coral `#B5472E`, amber `#E89A3C` / gold `#C9822F` on warm ivory `#FAF6EF`; dark ink `#1E2A2B` for text (three hue families used consistently).
+- **Fonts:** Fraunces (display, incl. italic) + Work Sans (supporting) — two families, loaded from Google Fonts.
 
 ## Spec compliance
 
