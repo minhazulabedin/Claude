@@ -1,11 +1,14 @@
-# World Mental Health Day 2026 — Poster (IUB Competition)
+# From Being Heard to Creating Change — Poster & Leaflet
 
-Poster for the World Mental Health Day 2026 poster competition at IUB.
+World Mental Health Day 2026 poster and A4 tri-fold leaflet, Independent University, Bangladesh (IUB).
+Prepared by **Group 12 · Health and Society**, from the group's own notes (30-09-26).
 
-**Theme:** "Lived experiences heard: real voices, real change."
-**Chosen message:** "From being heard to creating change" (listening leads to better support).
-**Slogan (original):** "Listening is where change begins."
-**Domain:** Positive Change (dignity, better support, reduced stigma), marked "Our focus" on the poster.
+- **Title (group's):** "From Being Heard to Creating Change"
+- **Theme line (exact, on the ribbon under the title):** "Lived experiences heard: real voices, real change."
+- **Slogan (group's):** "Your voice can start a conversation. Your action can create change."
+- **Steps:** Speak → Be heard → Take action → Create change (poster); Speak → Listen → Understand → Act → Create change (leaflet)
+- **Call to action (group's):** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
+- **Domain:** Positive Change (dignity, better support, reduced stigma), marked "Our focus" on the poster.
 
 ## Files
 
@@ -14,42 +17,62 @@ Poster for the World Mental Health Day 2026 poster competition at IUB.
 | `poster.html` | Poster source (A2 portrait at CSS scale: 1587 × 2245 px = 420 × 594 mm) |
 | `poster-a2-300dpi.png` | Print-ready raster, 4962 × 7019 px (300 dpi at A2) |
 | `poster-a2.pdf` | Print-ready vector PDF at true A2 size (420 × 594 mm) |
+| `leaflet.html` / `leaflet-A4.pdf` | A4 landscape tri-fold leaflet, 2 pages (page 1 outside, page 2 inside) |
+| `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
+| `leaflet-cover-scene.png` | Leaflet cover illustration (the poster's bridge scene) |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
-## Design approach
+## The poster
 
-One message, told as one picture. The message is a journey, so the central visual is a bridge.
+- **Title:** the group's title "From Being Heard to Creating Change" (92 px ≈ 69 pt bold).
+- **Theme line:** written exactly on the coral ribbon underneath.
+- **Central visual (about 40% of the sheet):** a bridge made of speech bubbles.
+  - **Left, "Unheard":** a grey cliff with signposts reading STIGMA, SILENCE, LEFT OUT. A faded, dashed figure
+    tries to speak, and its first faint speech bubble is where the bridge begins.
+  - **The bridge:** the bubbles change from grey "…", to teal voice waves, to coral and amber hearts (spoken,
+    heard, valued).
+  - **The top:** the speaker meets a listener and they hold hands under a glowing heart.
+  - **Right, "Heard & included":** under a rising sun, a diverse community (a person in a hijab, a young person,
+    an elder, a wheelchair user) sits at a round table. An empty chair is pulled out for the speaker:
+    "A seat at the table".
+  - **The gap:** the group's slogan sits over it.
+- **Journey ("How being heard becomes change"):**
+  - Speak: share your thoughts, concerns and ideas.
+  - Be heard: listen to others and understand different perspectives.
+  - Take action: work together to turn ideas into meaningful action.
+  - Create change (our focus): small actions can create a better community.
+- **Call to action:** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
+  It comes with three example small steps: offer peer support, challenge stigma, check in on a friend.
+- **Respect line:** "Every story is different — share with consent, listen with respect."
 
-- **Theme**: the 2026 theme line, written exactly, as the main title (≈69 pt bold).
-- **Message**: "From being heard to creating change" on the ribbon under the title (37.5 pt).
-- **Central visual (about 40% of the sheet)**: a bridge made of speech bubbles.
-  - **Left, "Unheard":** a grey cliff with signposts reading STIGMA, SILENCE, LEFT OUT. A faded,
-    dashed figure tries to speak, and its first faint speech bubble is where the bridge begins.
-  - **The bridge:** the bubbles change from grey "…" (unheard), to teal voice waves (speaking), to
-    coral and amber hearts (heard and valued). Footprints show the speaker has walked across.
-  - **The top:** the speaker meets a listener and they hold hands under a glowing heart, the moment
-    of being heard.
-  - **Right, "Heard & included":** a warm bank under a rising sun. A diverse community (a woman in a
-    hijab, a young person, an elder, a wheelchair user) sits at a round table. An empty chair is
-    pulled out for the speaker: "A seat at the table".
-  - **The gap:** the slogan "Listening is where change begins." sits over the gap.
-- **Journey ("How being heard becomes change")**: Listen → Value → Include → Create change, with
-  "Our focus" over *Create change*. The line runs from teal to amber, like the bridge.
-  - "Include" carries the lived-experience principle "Nothing about us, without us."
-  - "Create change" names the result: better support, dignity and less stigma.
-- **Call to action**: "Listen without judgement. Include people in decisions that affect them." plus
-  two concrete actions: offer peer support, challenge stigma.
-- **Respect line**: "Every story is different — share with consent, listen with respect."
+## The leaflet (A4 tri-fold)
 
-## Spec compliance
+- **Inside (page 2):** the group's five leaflet steps, each with its own line from the notes and three things to try.
+  - Speak: "Don't be afraid to share your ideas and concerns."
+  - Listen: "Respect other people's opinions and experience."
+  - Understand: "Hear from different perspectives and identify what needs to change."
+  - Act: "Work together and take small, meaningful steps."
+  - Create change: "Small actions can create a better community."
+  - Also: what lived experience means, why being heard matters, "Nothing about us, without us",
+    and words to say or avoid when listening.
+- **Outside (page 1):**
+  - **Inside flap:** "My small step this week", a tick-box pledge with space for your own step.
+  - **Back:** where to find support (someone you trust, university counselling, Shastho Batayon 16263, emergency 999),
+    "Share with care", when to check in, and the Group 12 credit.
+  - **Front cover:** the title, the bridge scene, the theme line, the slogan and the five steps.
+- **Printing:** print both pages double-sided, *flip on short edge*, at 100% ("actual size").
+- **Folding:** lay the sheet inside-up. Fold the right panel (Act / Create change) in first, then fold the left panel
+  (Speak) over it. The cover ends up on the front, and the "My small step" checklist is the first thing you see on opening.
+
+## Spec compliance (poster)
 
 - A2 portrait, 420 × 594 mm, 300 dpi output
 - Font sizes:
-  - main title 92 px ≈ 69 pt bold (48–72)
-  - message ribbon 50 px = 37.5 pt and slogan 54 px ≈ 40.5 pt (36–48)
-  - section heading 40 px = 30 pt (28–36)
+  - title 92 px ≈ 69 pt bold (48–72)
+  - slogan 50 px = 37.5 pt (36–48)
+  - section heading and step titles 40 px = 30 pt (28–36)
   - all supporting text ≥ 27 px ≈ 20 pt
-- About 100 words in total; roughly 65–70% visual
+- About 125 words; roughly 60% visual
 - Two font families: Fraunces + Work Sans
 - Strict palette: teal `#12626B`, coral `#E0684B`, amber `#E89A3C`, plus ink `#1E2A2B` and ivory `#FAF6EF`
 - Figures are dignified and cannot be identified, and there is no distressing imagery. Distress is shown
@@ -57,10 +80,15 @@ One message, told as one picture. The message is a journey, so the central visua
 
 ## Before submitting
 
-- Print an A4 test copy (teal often prints darker) and check it in greyscale.
-- View it from about 3 metres and as a thumbnail. The title, message and bridge should read in seconds.
-- Add team names (up to 3) if the competition rules ask for them on the poster.
+- Check the helpline numbers (16263, 999) are still current.
+- Print an A4 test copy of the poster (teal often prints darker) and check it in greyscale.
+- Print one leaflet double-sided and fold it to check the panel order.
+- Add team member names if the competition or course asks for them. The group's note says the names go on top of
+  the white submission file.
 
 ## Regenerating the print files
 
-Open `poster.html` in Chromium at a 1587 × 2245 viewport and screenshot at deviceScaleFactor ≈ 3.13 for the 300 dpi PNG; print to PDF at 420 × 594 mm with backgrounds enabled for the PDF (e.g. via Playwright's `page.screenshot` / `page.pdf`).
+- **Poster:** open `poster.html` in Chromium at a 1587 × 2245 viewport. Screenshot at deviceScaleFactor ≈ 3.13
+  for the 300 dpi PNG. Print to PDF at 420 × 594 mm with backgrounds enabled.
+- **Leaflet:** open `leaflet.html` at a 1123 px wide viewport. Screenshot each `.sheet` at deviceScaleFactor
+  3508/1123. Print to PDF at 297 × 210 mm with backgrounds enabled.
