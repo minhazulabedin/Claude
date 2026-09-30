@@ -5,6 +5,7 @@ Poster for the World Mental Health Day 2026 poster competition at IUB.
 **Theme:** "Lived experiences heard: real voices, real change."
 **Chosen message:** "From being heard to creating change" (listening leads to better support).
 **Slogan (original):** "Listening is where change begins."
+**Domain:** Positive Change (dignity, better support, reduced stigma), marked "Our focus" on the poster.
 
 ## Files
 
