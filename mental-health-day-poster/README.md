@@ -1,7 +1,7 @@
 # From Being Heard to Creating Change — Poster & Leaflet
 
 World Mental Health Day 2026 poster and A4 tri-fold leaflet, Independent University, Bangladesh (IUB).
-Prepared by **Group 12 · Health and Society**, from the group's own notes (30-09-26).
+Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-12)-Mahee, from the group's own notes (30-09-26).
 
 - **Title (group's):** "From Being Heard to Creating Change"
 - **Theme line (exact, on the ribbon under the title):** "Lived experiences heard: real voices, real change."
@@ -21,6 +21,7 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
 | `leaflet-cover-scene.png` | Leaflet cover illustration (the poster's bridge scene) |
 | `people/` | Photo cut-outs used in the scene (`couple.png`, `unheard.png`, `community.png`); faces blurred |
+| `file-cover.html` / `file-cover-A4.pdf` / `file-cover-A4-300dpi.png` | A4 cover sheet for the white submission file, with the three member names |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
 ## The poster
@@ -38,13 +39,16 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
     An empty chair is pulled out: "A seat at the table".
   - **The gap:** a path winds through a meadow under the bridge, with the group's slogan over it.
 - **Journey ("How being heard becomes change"):**
-  - Speak: share your thoughts, concerns and ideas.
-  - Be heard: listen to others and understand different perspectives.
-  - Take action: work together to turn ideas into meaningful action.
-  - Create change (our focus): small actions can create a better community.
+  - Speak: share your thoughts and ideas.
+  - Be heard: listen and understand other views.
+  - Take action: turn ideas into action, together.
+  - Create change (our focus): small actions build a better community.
+  (Short phrases on the poster, per the brief; the leaflet keeps the group's full sentences.)
 - **Call to action:** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
   It comes with three example small steps: offer peer support, challenge stigma, check in on a friend.
+- **Where to get help:** "Need to talk? Shastho Batayon 16263 · Emergency 999".
 - **Respect line:** "Every story is different — share with consent, listen with respect."
+- **Footer:** "Group 12: Shoada · Muna · Mahee · #RealVoicesRealChange".
 
 ## The leaflet (A4 tri-fold)
 
@@ -73,7 +77,7 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
   - slogan 50 px = 37.5 pt (36–48)
   - section heading and step titles 40 px = 30 pt (28–36)
   - all supporting text ≥ 27 px ≈ 20 pt
-- About 125 words; roughly 60% visual
+- About 130 words; measured 63% visual / 37% text by page area
 - Two font families: Fraunces + Work Sans
 - Strict palette: teal `#12626B`, coral `#E0684B`, amber `#E89A3C`, plus ink `#1E2A2B` and ivory `#FAF6EF`
 - People are dignified and cannot be identified: every face is blurred, and there is no distressing imagery.
@@ -82,8 +86,10 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
 ## About the photo people
 
 The people were cut out of the group's own AI-generated mockup image (724 × 1024 px), cleaned and placed
-into the vector poster. Faces that were still visible were blurred. Everything else on the poster is vector and
-prints sharp; the people print soft when seen up close (fine from normal poster-viewing distance). For a
+into the vector poster. Every face is blurred. The cut-outs were enhanced locally: compression noise was
+removed, then they were upscaled 8×, gently sharpened and given fine grain, so they now meet 300 dpi at their
+printed size (OpenCV, no AI upscaler). This cleans them up but cannot add detail that wasn't in the mockup, so
+up close they stay slightly soft. Everything else on the poster is vector and prints sharp. For a
 sharper A2 print, replace the three files in `people/` with higher-resolution versions (same poses, transparent
 background) and re-render. Ideally use free-licence stock photos (Unsplash or Pexels, faces hidden or blurred),
 and credit them here.
