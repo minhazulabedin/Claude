@@ -21,6 +21,7 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
 | `leaflet-cover-scene.png` | The poster's full bridge scene, used on the leaflet cover and file cover |
 | `people/` | Photo cut-outs used in the scene (`unheard.png`, `community.png`); faces blurred |
+| `iub-logo.png` | IUB logo (transparent), taken from the course guideline PDF (page 7 example) and cleaned to flat colours |
 | `file-cover.html` / `file-cover-A4.pdf` / `file-cover-A4-300dpi.png` | A4 cover sheet for the white submission file, with the three member names |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
