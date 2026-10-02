@@ -47,7 +47,6 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
   (Short phrases on the poster, per the brief; the leaflet keeps the group's full sentences.)
 - **Call to action:** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
   It comes with three example small steps: offer peer support, challenge stigma, check in on a friend.
-- **Where to get help:** "Need to talk? Shastho Batayon 16263 · Emergency 999".
 - **Respect line:** "Every story is different — share with consent, listen with respect."
 - **Footer:** "Group 12: Shoada · Muna · Mahee · #RealVoicesRealChange".
 
