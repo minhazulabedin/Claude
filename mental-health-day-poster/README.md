@@ -4,7 +4,7 @@ World Mental Health Day 2026 poster and A4 tri-fold leaflet, Independent Univers
 Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-12)-Mahee, from the group's own notes (30-09-26).
 
 - **Title (group's):** "From Being Heard to Creating Change"
-- **Theme line (exact, on the ribbon under the title):** "Lived experiences heard: real voices, real change."
+- **Theme line (exact, on the ribbon under the title, 36 pt):** "Lived experiences heard: real voices, real change."
 - **Slogan (group's):** "Your voice can start a conversation. Your action can create change."
 - **Steps:** Speak → Be heard → Take action → Create change (poster); Speak → Listen → Understand → Act → Create change (leaflet)
 - **Call to action (group's):** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
@@ -45,12 +45,16 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
   - Speak: share your thoughts and ideas.
   - Be heard: listen and understand other views.
   - Take action: turn ideas into action, together.
-  - Create change (our focus): small actions build a better community.
+  - Create change (our focus): less stigma, better support, a better community (the key benefits).
   (Short phrases on the poster, per the brief; the leaflet keeps the group's full sentences.)
 - **Call to action:** "Join the conversation — be a part of it. Work together and take small, meaningful steps."
   It comes with three example small steps: offer peer support, challenge stigma, check in on a friend.
+- **Support points (no phone numbers, per the group):** "Need support? Talk to someone you trust · IUB student
+  counselling". The full support panel, with 16263 and 999, stays inside the leaflet.
 - **Respect line:** "Every story is different — share with consent, listen with respect."
-- **Footer:** "Group 12: Shoada · Muna · Mahee · #RealVoicesRealChange".
+- **Footer:** "Group 12: Shoada · Muna · Mahee · #RealVoicesRealChange". Top right of the header: Department of
+  Public Health · Independent University, Bangladesh, with the IUB logo top left.
+- **All six sample parts present:** caption, picture, key benefits, support points, call for actions, logo.
 
 ## The leaflet (A4 tri-fold)
 
@@ -103,7 +107,8 @@ and credit them here.
 - Print one leaflet double-sided and fold it to check the panel order.
 - Run the pre-test with `pretest-form-A4.pdf` (10 students), fix anything fewer than 8 of 10 got right, then show
   the course teacher before the final print (guideline step 3 and leaflet instruction 6).
-- Print the leaflet on A4 and check a black-and-white photocopy (guideline instruction A).
+- Print the leaflet on A4, photocopy it, and submit the printed leaflet to the course teacher (instructions A and B).
+- Confirm the exact name and location of the IUB student counselling service before printing.
 
 ## Regenerating the print files
 
