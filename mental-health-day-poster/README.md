@@ -19,8 +19,8 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
 | `poster-a2.pdf` | Print-ready vector PDF at true A2 size (420 × 594 mm) |
 | `leaflet.html` / `leaflet-A4.pdf` | A4 landscape tri-fold leaflet, 2 pages (page 1 outside, page 2 inside) |
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
-| `leaflet-cover-scene.png` | Leaflet cover illustration (the poster's bridge scene) |
-| `people/` | Photo cut-outs used in the scene (`couple.png`, `unheard.png`, `community.png`); faces blurred |
+| `leaflet-cover-scene.png` | The poster's full bridge scene, used on the leaflet cover and file cover |
+| `people/` | Photo cut-outs used in the scene (`unheard.png`, `community.png`); faces blurred |
 | `file-cover.html` / `file-cover-A4.pdf` / `file-cover-A4-300dpi.png` | A4 cover sheet for the white submission file, with the three member names |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
@@ -31,10 +31,11 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
 - **Central visual (about 40% of the sheet):** a bridge made of speech bubbles. The people are real-looking photo
   cut-outs with blurred faces, set into the drawn scene (the layout follows the group's mockup).
   - **Left, "Unheard":** a grey cliff with signposts reading STIGMA, SILENCE, LEFT OUT. A faded grey person walks
-    away, head down; their faint speech bubble is where the bridge begins.
-  - **The bridge:** the bubbles change from grey "…", to teal voice waves, to coral and amber hearts (spoken,
-    heard, valued).
-  - **The top:** two young people hold hands under a glowing heart: the moment of being heard.
+    toward the bridge; their faint, unanswered speech bubble is where the bridge begins.
+  - **The bridge:** the bubbles change from grey "…" to teal voice waves, coral ticks and amber sprouts (spoken,
+    heard, acted on, growing into change).
+  - **The top:** a conversation emblem: one speech bubble (voice waves) is answered by another with a tick, the
+    moment of being heard. There are no romantic or couple images, only peers, listening and inclusion.
   - **Right, "Heard & included":** under a rising sun, four friends, one in a wheelchair, sit at a round table.
     An empty chair is pulled out: "A seat at the table".
   - **The gap:** a path winds through a meadow under the bridge, with the group's slogan over it.
