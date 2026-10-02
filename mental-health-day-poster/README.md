@@ -20,22 +20,23 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
 | `leaflet.html` / `leaflet-A4.pdf` | A4 landscape tri-fold leaflet, 2 pages (page 1 outside, page 2 inside) |
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
 | `leaflet-cover-scene.png` | Leaflet cover illustration (the poster's bridge scene) |
+| `people/` | Photo cut-outs used in the scene (`couple.png`, `unheard.png`, `community.png`); faces blurred |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
 ## The poster
 
 - **Title:** the group's title "From Being Heard to Creating Change" (92 px ≈ 69 pt bold).
 - **Theme line:** written exactly on the coral ribbon underneath.
-- **Central visual (about 40% of the sheet):** a bridge made of speech bubbles.
-  - **Left, "Unheard":** a grey cliff with signposts reading STIGMA, SILENCE, LEFT OUT. A faded, dashed figure
-    tries to speak, and its first faint speech bubble is where the bridge begins.
+- **Central visual (about 40% of the sheet):** a bridge made of speech bubbles. The people are real-looking photo
+  cut-outs with blurred faces, set into the drawn scene (the layout follows the group's mockup).
+  - **Left, "Unheard":** a grey cliff with signposts reading STIGMA, SILENCE, LEFT OUT. A faded grey person walks
+    away, head down; their faint speech bubble is where the bridge begins.
   - **The bridge:** the bubbles change from grey "…", to teal voice waves, to coral and amber hearts (spoken,
     heard, valued).
-  - **The top:** the speaker meets a listener and they hold hands under a glowing heart.
-  - **Right, "Heard & included":** under a rising sun, a diverse community (a person in a hijab, a young person,
-    an elder, a wheelchair user) sits at a round table. An empty chair is pulled out for the speaker:
-    "A seat at the table".
-  - **The gap:** the group's slogan sits over it.
+  - **The top:** two young people hold hands under a glowing heart: the moment of being heard.
+  - **Right, "Heard & included":** under a rising sun, four friends, one in a wheelchair, sit at a round table.
+    An empty chair is pulled out: "A seat at the table".
+  - **The gap:** a path winds through a meadow under the bridge, with the group's slogan over it.
 - **Journey ("How being heard becomes change"):**
   - Speak: share your thoughts, concerns and ideas.
   - Be heard: listen to others and understand different perspectives.
@@ -75,8 +76,17 @@ Prepared by **Group 12 · Health and Society**, from the group's own notes (30-0
 - About 125 words; roughly 60% visual
 - Two font families: Fraunces + Work Sans
 - Strict palette: teal `#12626B`, coral `#E0684B`, amber `#E89A3C`, plus ink `#1E2A2B` and ivory `#FAF6EF`
-- Figures are dignified and cannot be identified, and there is no distressing imagery. Distress is shown
-  only as greyness and a faded outline, never as a suffering person.
+- People are dignified and cannot be identified: every face is blurred, and there is no distressing imagery.
+  Distress is shown only as a faded grey figure walking away, never as a suffering person.
+
+## About the photo people
+
+The people were cut out of the group's own AI-generated mockup image (724 × 1024 px), cleaned and placed
+into the vector poster. Faces that were still visible were blurred. Everything else on the poster is vector and
+prints sharp; the people print soft when seen up close (fine from normal poster-viewing distance). For a
+sharper A2 print, replace the three files in `people/` with higher-resolution versions (same poses, transparent
+background) and re-render. Ideally use free-licence stock photos (Unsplash or Pexels, faces hidden or blurred),
+and credit them here.
 
 ## Before submitting
 
