@@ -20,8 +20,9 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
 | `leaflet.html` / `leaflet-A4.pdf` | A4 landscape tri-fold leaflet, 2 pages (page 1 outside, page 2 inside) |
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
 | `leaflet-cover-scene.png` | The poster's full bridge scene, used on the leaflet cover and file cover |
-| `people/` | Photo cut-outs used in the scene (`unheard.png`, `community.png`); faces blurred |
+| `people/` | Photo layers used in the scene: `unheard.png` (faded figure) and `park-table.png` (the park and café table, from the group's mockup); faces blurred. `community.png` is an older cut-out kept for reference |
 | `iub-logo.png` | IUB logo (transparent), taken from the course guideline PDF (page 7 example) and cleaned to flat colours |
+| `pretest-form.html` / `pretest-form-A4.pdf` / `pretest-form-A4-300dpi.png` | A4 pre-test form (guideline step 3): audience, six questions, a tally sheet for 10 students |
 | `file-cover.html` / `file-cover-A4.pdf` / `file-cover-A4-300dpi.png` | A4 cover sheet for the white submission file, with the three member names |
 | `fonts/` | Fraunces and Work Sans (SIL Open Font License), used for offline rendering |
 
@@ -37,8 +38,8 @@ Prepared by **Group 12 · Health and Society**: (G-12)-Shoada, (G-12)-Muna, (G-1
     heard, acted on, growing into change).
   - **The top:** a conversation emblem: one speech bubble (voice waves) is answered by another with a tick, the
     moment of being heard. There are no romantic or couple images, only peers, listening and inclusion.
-  - **Right, "Heard & included":** under a rising sun, four friends, one in a wheelchair, sit at a round table.
-    An empty chair is pulled out: "A seat at the table".
+  - **Right, "Heard & included":** in a sunny park, four friends, one in a wheelchair, sit around a café table.
+    An empty orange chair is pulled out: "A seat at the table". The park is softly out of focus so the group stands out.
   - **The gap:** a path winds through a meadow under the bridge, with the group's slogan over it.
 - **Journey ("How being heard becomes change"):**
   - Speak: share your thoughts and ideas.
@@ -100,8 +101,9 @@ and credit them here.
 - Check the helpline numbers (16263, 999) are still current.
 - Print an A4 test copy of the poster (teal often prints darker) and check it in greyscale.
 - Print one leaflet double-sided and fold it to check the panel order.
-- Add team member names if the competition or course asks for them. The group's note says the names go on top of
-  the white submission file.
+- Run the pre-test with `pretest-form-A4.pdf` (10 students), fix anything fewer than 8 of 10 got right, then show
+  the course teacher before the final print (guideline step 3 and leaflet instruction 6).
+- Print the leaflet on A4 and check a black-and-white photocopy (guideline instruction A).
 
 ## Regenerating the print files
 
