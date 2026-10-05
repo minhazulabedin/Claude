@@ -20,6 +20,8 @@ own notes of 30-09-26.
 | `poster.html` | Poster source (A2 portrait at CSS scale: 1587 × 2245 px = 420 × 594 mm) |
 | `poster-a2-300dpi.png` | Print-ready raster, 4962 × 7019 px (300 dpi at A2) |
 | `poster-a2.pdf` | Print-ready vector PDF at true A2 size (420 × 594 mm) |
+| `poster2.html` / `poster2-a2.pdf` / `poster2-a2-300dpi.png` | Poster 2, the teammate's layout: no top logo or corner text, no bottom text rows, IUB logo at the bottom |
+| `poster3.html` / `poster3-a2.pdf` / `poster3-a2-300dpi.png` | Poster 3, scrapbook style: kraft-paper sheet held by hands at the corners, taped notes, four problem-and-solution cards, watercolour group, IUB seal with the motto and a navy ribbon |
 | `leaflet.html` / `leaflet-A4.pdf` | A4 landscape tri-fold leaflet, 2 pages (page 1 outside, page 2 inside) |
 | `leaflet-outside-300dpi.png`, `leaflet-inside-300dpi.png` | 300 dpi images of each leaflet side |
 | `leaflet-cover-scene.png` | The poster's bridge scene, used on the leaflet cover and the file cover |
