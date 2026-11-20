@@ -3,6 +3,16 @@
 Full-resolution original files from Wikimedia Commons (not thumbnails), downloaded via the
 Commons API `imageinfo` original URL on upload.wikimedia.org. All four are JPEG originals.
 
+> Status: only `Figure 1.jpg` is in this folder so far. upload.wikimedia.org rate-limited the
+> download host (HTTP 429) for Figures 2–4; their original URLs are listed below for download.
+> Figure 1 is stored as 6000 × 4000 with an EXIF orientation tag that displays it as 4000 × 6000.
+
+Original file URLs:
+
+- Figure 2: https://upload.wikimedia.org/wikipedia/commons/b/b2/Nobo_Kumar_Bhadra%27s_animal_related_rickshaw_art.jpg
+- Figure 3: https://upload.wikimedia.org/wikipedia/commons/4/46/Rickshaw_Art.jpg
+- Figure 4: https://upload.wikimedia.org/wikipedia/commons/a/ae/Electric_easy_bikes_and_tomtoms_at_market_junction_Khulna.jpg
+
 | Figure | File | Commons file page | Author | License | Original pixels | File size (bytes) |
 |---|---|---|---|---|---|---|
 | Figure 1 | `Figure 1.jpg` | https://commons.wikimedia.org/wiki/File:Rickshaw_back_decoration.jpg | Mrb Rafi | CC BY-SA 4.0 | 4000 × 6000 | 7,566,204 |
