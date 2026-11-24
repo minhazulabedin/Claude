@@ -1,4 +1,4 @@
-const CACHE = 'neoroutine-v1';
+const CACHE = 'neoroutine-v2';
 const ASSETS = [
   './',
   './index.html',
